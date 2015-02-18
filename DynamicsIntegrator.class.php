@@ -326,6 +326,70 @@ class DynamicsIntegrator
 		return $createResult;
 	}
 
+	public function createAccount($info) {
+		global $_DEBUG_MODE;
+
+		$xml='<Execute xmlns="http://schemas.microsoft.com/xrm/2011/Contracts/Services">
+				<request i:type="b:CreateRequest" xmlns:b="http://schemas.microsoft.com/xrm/2011/Contracts" xmlns:i="http://www.w3.org/2001/XMLSchema-instance">
+		      <b:Parameters xmlns:c="http://schemas.datacontract.org/2004/07/System.Collections.Generic">
+		        <b:KeyValuePairOfstringanyType>
+		          <c:key>Target</c:key>
+		          <c:value i:type="b:Entity">
+		              <b:Attributes>
+		              <b:KeyValuePairOfstringanyType>
+		                <c:key>name</c:key>
+		                <c:value i:type="d:string" xmlns:d="http://www.w3.org/2001/XMLSchema">test account</c:value>
+		              </b:KeyValuePairOfstringanyType>
+		            </b:Attributes>
+		            <b:EntityState i:nil="true" />
+		            <b:FormattedValues />
+		            <b:Id>00000000-0000-0000-0000-000000000000</b:Id>
+		            <b:LogicalName>account</b:LogicalName>
+		            <b:RelatedEntities />
+		          </c:value>
+		        </b:KeyValuePairOfstringanyType>
+		      </b:Parameters>
+		      <b:RequestId i:nil="true" />
+		      <b:RequestName>Create</b:RequestName>
+				</request>
+			</Execute>';
+
+		$head = EntityUtils::getCRMSoapHeader(TopBikeDynamicsIntegrator::$organizationServiceURL, TopBikeDynamicsIntegrator::$securityData);
+
+		$req_xml= "<s:Body>";
+		$req_xml.= $xml;
+		$req_xml.= "</s:Body>";
+		$req_xml.= '</s:Envelope>';
+
+		$domainname = substr(TopBikeDynamicsIntegrator::$organizationServiceURL,8,-1);
+		$pos = strpos($domainname, "/");
+		$domainname = substr($domainname,0,$pos);
+
+		$response =  LiveIDManager::GetSOAPResponse("/Organization.svc", $domainname, TopBikeDynamicsIntegrator::$organizationServiceURL, $head.$req_xml);
+
+		if ($_DEBUG_MODE) {
+			echo "<pre>";
+			echo var_dump($response);
+			echo "</pre>";
+			echo "<br/>";
+		}
+
+		$createResult ="";
+		if($response!=null && $response!=false) {
+			preg_match('/<CreateResult>(.*)<\/CreateResult>/', $response, $matches);
+			if ( count($matches) > 0 ) {
+				$createResult = $matches[1];
+				// error_log("Contact creato. GUID: ".$createResult);
+			} else {
+				$createResult = false;
+			}
+		} else {
+			$createResult = false;
+		}
+
+		return $createResult;
+	}
+
 	public function createContact($info) {
 
 		global $_DEBUG_MODE;

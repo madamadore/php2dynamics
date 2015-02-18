@@ -9,19 +9,9 @@ include_once "functions.php";
 echo "Test started<br/>";
 
 $integrator = DynamicsIntegrator::getInstance( "website@topbike.onmicrosoft.com", "WS__2k14" );
-echo "Dynamic integrator created<br/>";
-
-$securityData = $integrator::getSecurityData();
-
-if ( null === $securityData ) {
-	die("FAIL: security data not present");
-}
-echo "Security data check: <br/>";
-echo "<pre>";
-echo var_dump( $securityData );
-echo "</pre>";
-
-testGetContacts($integrator);
-testCreateContact($integrator);
+// testGetContacts($integrator);
+// testSecurityData($integrator);
+// testCreateContact($integrator);
+testCreateAccount($integrator);
 
 

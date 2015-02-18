@@ -199,7 +199,7 @@ class LiveIDManager {
 		    curl_setopt($cURLHandle, CURLOPT_HTTPAUTH, CURLAUTH_NTLM);
 	        curl_setopt($cURLHandle, CURLOPT_POSTFIELDS, $content);
 		    curl_setopt($cURLHandle, CURLOPT_TIMEOUT, 1000);
-	        // curl_setopt($cURLHandle, CURLOPT_SSLVERSION , 4);
+	        curl_setopt($cURLHandle, CURLOPT_SSLVERSION , 3);
 
 		    if ( true === $_DEBUG_MODE ) {
 			    echo "<b>Call to </b>" . $soapUrl . "<br/>";
