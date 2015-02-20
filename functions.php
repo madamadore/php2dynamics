@@ -6,7 +6,7 @@ function testGetContacts($integrator) {
 
 function testCreateContact($integrator) {
 
-	echo "TEST - CREATE CONTACT - START<br/>";
+	echo "<b>TEST - CREATE CONTACT</b> - START<br/>";
 	$user = new stdClass();
 	$user->firstname = "User";
 	$user->lastname = "Test";
@@ -34,10 +34,24 @@ function testSecurityData($integrator) {
 
 function testCreateAccount($integrator) {
 
-	echo "TEST - CREATE ACCOUNT - START<br/>";
+	echo "<br/>";
+	echo "<b>TEST - CREATE ACCOUNT</b> - START<br/>";
 	$user = new stdClass();
 	$user->name = "Test Account";
 	$contact_id = $integrator->createAccount( $user );
 
 	echo "Account creato: " . $contact_id . "<br/>";
+	echo "TEST - CREATE ACCOUNT - END<br/><br/>";
+}
+
+function testCreateAccountBis($integrator) {
+
+	echo "<br/>";
+	echo "<b>TEST - CREATE ACCOUNT</b> - START<br/>";
+	$account = new Account("Test Account");
+
+	$contact_id = $integrator->createAccountBis( $account );
+
+	echo "Account creato: " . $contact_id . "<br/>";
+	echo "TEST - CREATE ACCOUNT - END<br/><br/>";
 }

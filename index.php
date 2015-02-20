@@ -8,10 +8,10 @@ include_once "functions.php";
 
 echo "Test started<br/>";
 
-$integrator = DynamicsIntegrator::getInstance( "website@topbike.onmicrosoft.com", "WS__2k14" );
+//$integrator = DynamicsIntegrator::getInstance( "website@topbike.onmicrosoft.com", "WS__2k14" );
+$integrator = DynamicsIntegrator::getInstance();
 // testGetContacts($integrator);
-// testSecurityData($integrator);
-// testCreateContact($integrator);
+testSecurityData($integrator);
 testCreateAccount($integrator);
-
-
+testCreateAccountBis($integrator);
+testCreateContact($integrator);

@@ -2,6 +2,10 @@
 require_once(dirname(__FILE__) . '/dynamics/LiveIDManager.php');
 require_once(dirname(__FILE__) . '/dynamics/EntityUtils.php');
 
+require_once(dirname(__FILE__) . '/entities/Entity.php');
+require_once(dirname(__FILE__) . '/entities/Account.class.php');
+require_once(dirname(__FILE__) . '/entities/Contact.class.php');
+
 /**
  * This class realize the integration bewtween PHP and Microsoft Dynamics.
  *
@@ -13,6 +17,9 @@ class DynamicsIntegrator
 {
 // 	private static $liveIDUsername = "website@topbike.onmicrosoft.com";
 //	private static $liveIDPassword = "TBR_2k13";
+// 	private static $liveIDUsername = "matteo@topbike.onmicrosoft.com";
+//	private static $liveIDPassword = "Habo6863";
+
  	private static $liveIDUsername = "admin@topbike.onmicrosoft.com";
 	private static $liveIDPassword = "2012Topbike";
 	private static $organizationServiceURL = "https://topbike.crm4.dynamics.com/XRMServices/2011/Organization.svc";
@@ -36,12 +43,20 @@ class DynamicsIntegrator
 
 	private function __construct($IDUsername = null, $IDPassword = null)
 	{
-		if (null === $IDUsername) $IDUsername = self::$liveIDUsername;
-		if (null === $IDPassword) $IDPassword = self::$liveIDPassword;
-		// Your "heavy" initialization stuff here
-		$liveIDManager = new LiveIDManager();
-		self::$securityData = $liveIDManager->authenticateWithLiveID( self::$organizationServiceURL, $IDUsername, $IDPassword );
+		self::createSecurityData($IDUsername, $IDPassword);
+	}
 
+	public static function createSecurityData($IDUsername = null, $IDPassword = null) {
+
+		try {
+			if (null === $IDUsername) $IDUsername = self::$liveIDUsername;
+			if (null === $IDPassword) $IDPassword = self::$liveIDPassword;
+
+			$liveIDManager      = new LiveIDManager();
+			self::$securityData = $liveIDManager->authenticateWithLiveID( self::$organizationServiceURL, $IDUsername, $IDPassword );
+		} catch (Exception $ex) {
+			self::$securityData = null;
+		}
 	}
 
 	public static function getInstance($IDUsername = null, $IDPassword = null)
@@ -50,87 +65,50 @@ class DynamicsIntegrator
 		{
 			self::$instance = new self( $IDUsername, $IDPassword );
 		}
+
+		self::$instance = new self( $IDUsername, $IDPassword );
+
 		return self::$instance;
 	}
 
-	static function getSecurityData() {
+	public static function getSecurityData() {
 		return self::$securityData;
 	}
 
-	function checkAvailability($resources, $start_date, $end_date, $start_time = "05:00:00", $end_time = "05:00:00")
-	{
-		$domainname = substr(self::$organizationServiceURL,8,-1);
-		$pos = strpos($domainname, "/");
-		$domainname = substr($domainname,0,$pos);
+	private function do_entity_array_value($entity) {
+		$xml = '<b:Entity>
+					<b:Attributes>
+						<b:KeyValuePairOfstringanyType>
+						<c:key>partyid</c:key>
+						<c:value i:type="b:EntityReference">
+							<b:Id>' . $entity->ID . '</b:Id>
+							<b:LogicalName>equipment</b:LogicalName>
+							<b:Name i:nil="true" />
+						</c:value>
+						</b:KeyValuePairOfstringanyType>
+					</b:Attributes>
+		            <b:EntityState i:nil="true" />
+		            <b:FormattedValues />
+		            <b:Id>00000000-0000-0000-0000-000000000000</b:Id>
+		            <b:LogicalName>activityparty</b:LogicalName>
+		            <b:RelatedEntities />
+				</b:Entity>';
+		return $xml;
+	}
 
-		$st = new DateTime( $start_time );
-		$st->modify( '-1 hour' );
-		$start_time = $st->format( 'H:i:s' );
+	private function do_array_entities_value($key, $arrayOfEntities, $logicalName) {
 
-		$et = new DateTime( $end_time );
-		$et->modify( '+1 hour' );
-		$end_time = $et->format( 'H:i:s' );
+		$xml = '<b:KeyValuePairOfstringanyType>
+					<c:key>'.$key.'</c:key>
+					<c:value i:type="b:ArrayOfEntity">';
 
-		$head = EntityUtils::getCRMSoapHeader(self::$organizationServiceURL, self::$securityData);
-		$request = '<s:Body>
-                <Execute xmlns="http://schemas.microsoft.com/xrm/2011/Contracts/Services" xmlns:i="http://www.w3.org/2001/XMLSchema-instance">
-                <request i:type="b:QueryMultipleSchedulesRequest" xmlns:a="http://schemas.microsoft.com/xrm/2011/Contracts" xmlns:b="http://schemas.microsoft.com/crm/2011/Contracts">
-                    <a:Parameters xmlns:c="http://schemas.datacontract.org/2004/07/System.Collections.Generic">
-                        <a:KeyValuePairOfstringanyType>
-                            <c:key>ResourceIds</c:key>
-                            <c:value i:type="d:ArrayOfguid" xmlns:d="http://schemas.microsoft.com/2003/10/Serialization/Arrays">';
-		foreach ($resources as $resource)
-			$request .= '<d:guid>'.$resource.'</d:guid>';
-		$request .= '</c:value>
-                        </a:KeyValuePairOfstringanyType>
-                        <a:KeyValuePairOfstringanyType>
-                            <c:key>Start</c:key>
-                            <c:value i:type="d:dateTime" xmlns:d="http://www.w3.org/2001/XMLSchema">'.$start_date.'T'.$start_time.'Z</c:value>
-                        </a:KeyValuePairOfstringanyType>
-                        <a:KeyValuePairOfstringanyType>
-                            <c:key>End</c:key>
-                            <c:value i:type="d:dateTime" xmlns:d="http://www.w3.org/2001/XMLSchema">'.$end_date.'T'.$end_time.'Z</c:value>
-                        </a:KeyValuePairOfstringanyType>
-                        <a:KeyValuePairOfstringanyType>
-                            <c:key>TimeCodes</c:key>
-                            <c:value i:type="d:ArrayOfTimeCode" xmlns:d="http://schemas.microsoft.com/2003/10/Serialization/Arrays">
-                                <d:TimeCode>Available</d:TimeCode>
-                            </c:value>
-                        </a:KeyValuePairOfstringanyType>
-                    </a:Parameters>
-                    <a:RequestId i:nil="true" />
-                    <a:RequestName>QueryMultipleSchedules</a:RequestName>
-                </request>
-                </Execute>
-            </s:Body>
-            </s:Envelope>';
-
-		error_log($request);
-		$response =  LiveIDManager::GetSOAPResponse("/Organization.svc", $domainname, self::$organizationServiceURL, $head.$request);
-		error_log($response);
-
-		$accountsArray = array();
-		if($response!=null && $response!="") {
-
-			$responsedom = new DomDocument();
-			$responsedom->loadXML($response);
-			$entities = $responsedom->getElementsbyTagName("ArrayOfTimeInfo");
-			foreach($entities as $entity) {
-				$reservation = array();
-				$kvptypes = $entity->getElementsbyTagName("TimeInfo");
-				foreach($kvptypes as $kvp) {
-					$start =  $kvp->getElementsbyTagName("Start")->item(0)->textContent;
-					$end =  $kvp->getElementsbyTagName("End")->item(0)->textContent;
-					$timecode =  $kvp->getElementsbyTagName("TimeCode")->item(0)->textContent;
-					$reservation[$start] = $timecode;
-				}
-				$accountsArray[] = $reservation;
-			}
-		} else {
-			return false;
+		foreach ($arrayOfEntities as $entity) {
+			$xml .= do_entity_array_value($entity);
 		}
 
-		return $accountsArray;
+		$xml .= '</c:value>
+				</b:KeyValuePairOfstringanyType>';
+		return $xml;
 	}
 
 	private function do_guid_value($key, $guid, $logicalName) {
@@ -148,10 +126,7 @@ class DynamicsIntegrator
 
 	private function do_generic_value($key, $value, $type) {
 
-		$xml = '<b:KeyValuePairOfstringanyType>
-                                <c:key>' . $key . '</c:key>
-                                <c:value i:type="d:' . $type . '" xmlns:d="http://www.w3.org/2001/XMLSchema">'.$value.'</c:value>
-                     </b:KeyValuePairOfstringanyType>';
+		$xml = '<b:KeyValuePairOfstringanyType><c:key>' . $key . '</c:key><c:value i:type="d:' . $type . '" xmlns:d="http://www.w3.org/2001/XMLSchema">'.$value.'</c:value></b:KeyValuePairOfstringanyType>';
 		return $xml;
 	}
 
@@ -177,28 +152,95 @@ class DynamicsIntegrator
 		return $xml;
 	}
 
-	private function make_query($xml) {
+	private function getRequestHeaders() {
+		$head = EntityUtils::getCRMSoapHeader(self::$organizationServiceURL, self::$securityData);
+		return $head;
+	}
 
-		$crm_link=& new TopBikeDynamicsIntegrator();
+	private function getHeadBody() {
+		$xml = '<s:Body>
+				<Execute xmlns="http://schemas.microsoft.com/xrm/2011/Contracts/Services">
+				<request i:type="b:CreateRequest" xmlns:b="http://schemas.microsoft.com/xrm/2011/Contracts" xmlns:i="http://www.w3.org/2001/XMLSchema-instance">
+		      	<b:Parameters xmlns:c="http://schemas.datacontract.org/2004/07/System.Collections.Generic">
+		        <b:KeyValuePairOfstringanyType>
+		          <c:key>Target</c:key>
+		          <c:value i:type="b:Entity">
+		              <b:Attributes>';
+		return $xml;
+	}
 
-		$head = EntityUtils::getCRMSoapHeader(TopBikeDynamicsIntegrator::$organizationServiceURL, TopBikeDynamicsIntegrator::$securityData);
+	private function getTailBody($entityLogicalName, $requestName = "Create") {
+		$xml = '</b:Attributes>
+		            <b:EntityState i:nil="true" />
+		            <b:FormattedValues />
+		            <b:Id>00000000-0000-0000-0000-000000000000</b:Id>
+		            <b:LogicalName>' . $entityLogicalName . '</b:LogicalName>
+		            <b:RelatedEntities />
+		          </c:value>
+		        </b:KeyValuePairOfstringanyType>
+		      	</b:Parameters>
+		      	<b:RequestId i:nil="true" />
+		      	<b:RequestName>' . $requestName . '</b:RequestName>
+				</request>
+				</Execute>
+				</s:Body></s:Envelope>';
+		return $xml;
+	}
 
-		$req_xml= "<s:Body>";
-		$req_xml.= $xml;
-		$req_xml.= "</s:Body>";
-		$req_xml.= '</s:Envelope>';
+	private function getEntityBody($entity) {
+		$xml = "";
+		foreach ($entity->schema as $key=>$tipology) {
+			$value = $entity->{$key};
+			switch ($tipology[0]) {
+				case "string":
+					$xml .= $this->do_generic_value($key, $value, "string");
+					break;
+				case "money":
+					$xml .= $this->do_money_value($key, $value);
+					break;
+				case "option":
+					$xml .= $this->do_option_value($key, $value);
+					break;
+				case "guid":
+					$xml .= $this->do_guid_value($key, $value, "string"); // TODO: ??
+					break;
+			}
+		}
 
-		$domainname = substr(TopBikeDynamicsIntegrator::$organizationServiceURL,8,-1);
+		return $xml;
+	}
+
+	private function doCreateRequest($entity) {
+
+		global $_DEBUG_MODE;
+
+		$head = $this->getRequestHeaders();
+		$body = $this->getHeadBody();
+		$body .= $this->getEntityBody($entity);
+		$body .= $this->getTailBody($entity->logicalName);
+
+		$domainname = substr(DynamicsIntegrator::$organizationServiceURL,8,-1);
 		$pos = strpos($domainname, "/");
 		$domainname = substr($domainname,0,$pos);
 
-		$response =  LiveIDManager::GetSOAPResponse("/Organization.svc", $domainname, TopBikeDynamicsIntegrator::$organizationServiceURL, $head.$req_xml);
-		error_log($response);
+		$envelope = $head.$body;
+
+		if ($_DEBUG_MODE) {
+			echo $envelope;
+			echo "<br/>";
+		}
+
+		$response =  LiveIDManager::GetSOAPResponse("/Organization.svc", $domainname, DynamicsIntegrator::$organizationServiceURL, $envelope);
+
+		if ($_DEBUG_MODE) {
+			echo $response;
+			echo "<br/>";
+		}
 
 		return $response;
 	}
 
-	public function createReservation($info) {
+	public function createBooking($info) {
 		$domainname = substr(self::$organizationServiceURL,8,-1);
 		$pos = strpos($domainname, "/");
 		$domainname = substr($domainname,0,$pos);
@@ -326,6 +368,12 @@ class DynamicsIntegrator
 		return $createResult;
 	}
 
+	public function createAccountBis($account) {
+
+		return $this->doCreateRequest($account);
+	}
+	/**
+	 */
 	public function createAccount($info) {
 		global $_DEBUG_MODE;
 
@@ -354,23 +402,29 @@ class DynamicsIntegrator
 				</request>
 			</Execute>';
 
-		$head = EntityUtils::getCRMSoapHeader(TopBikeDynamicsIntegrator::$organizationServiceURL, TopBikeDynamicsIntegrator::$securityData);
+		$head = EntityUtils::getCRMSoapHeader(DynamicsIntegrator::$organizationServiceURL, DynamicsIntegrator::$securityData);
 
 		$req_xml= "<s:Body>";
 		$req_xml.= $xml;
 		$req_xml.= "</s:Body>";
 		$req_xml.= '</s:Envelope>';
 
-		$domainname = substr(TopBikeDynamicsIntegrator::$organizationServiceURL,8,-1);
+		$domainname = substr(DynamicsIntegrator::$organizationServiceURL,8,-1);
 		$pos = strpos($domainname, "/");
 		$domainname = substr($domainname,0,$pos);
 
-		$response =  LiveIDManager::GetSOAPResponse("/Organization.svc", $domainname, TopBikeDynamicsIntegrator::$organizationServiceURL, $head.$req_xml);
+		$envelope = $head.$req_xml;
 
 		if ($_DEBUG_MODE) {
 			echo "<pre>";
-			echo var_dump($response);
+			echo $envelope;
 			echo "</pre>";
+		}
+
+		$response =  LiveIDManager::GetSOAPResponse("/Organization.svc", $domainname, DynamicsIntegrator::$organizationServiceURL, $envelope);
+
+		if ($_DEBUG_MODE) {
+			echo $response;
 			echo "<br/>";
 		}
 
@@ -398,36 +452,89 @@ class DynamicsIntegrator
 		$pos = strpos($domainname, "/");
 		$domainname = substr($domainname,0,$pos);
 
-		$head = EntityUtils::getCreateCRMSoapHeader(self::$organizationServiceURL, self::$securityData);
+		$head = EntityUtils::getCRMSoapHeader(DynamicsIntegrator::$organizationServiceURL, DynamicsIntegrator::$securityData);
+		// $head = EntityUtils::getCreateCRMSoapHeader(self::$organizationServiceURL, self::$securityData);
 
 		$request = '<s:Body>
-					<Create xmlns="http://schemas.microsoft.com/xrm/2011/Contracts/Services">
-						<entity xmlns:b="http://schemas.microsoft.com/xrm/2011/Contracts" xmlns:i="http://www.w3.org/2001/XMLSchema-instance">
-							<b:Attributes xmlns:c="http://schemas.datacontract.org/2004/07/System.Collections.Generic">';
+					<Execute xmlns="http://schemas.microsoft.com/xrm/2011/Contracts/Services">
+				<request i:type="b:CreateRequest" xmlns:b="http://schemas.microsoft.com/xrm/2011/Contracts" xmlns:i="http://www.w3.org/2001/XMLSchema-instance">
+		      <b:Parameters xmlns:c="http://schemas.datacontract.org/2004/07/System.Collections.Generic">
+		        <b:KeyValuePairOfstringanyType>
+		          <c:key>Target</c:key>
+		          <c:value i:type="b:Entity">
+		              <b:Attributes>';
 
+		$request .= $this->do_generic_value('fullname', $info->firstname . " " . $info->lastname, 'string');
 		$request .= $this->do_generic_value('firstname', $info->firstname, 'string');
 		$request .= $this->do_generic_value('lastname', $info->lastname, 'string');
-		$request .= $this->do_generic_value('emailaddress', $info->emailaddress, 'string');
-		$request .= $this->do_generic_value('mobilephone', $info->mobilephone, 'string');
+		//$request .= $this->do_generic_value('emailaddress', $info->emailaddress, 'string');
+		//$request .= $this->do_generic_value('mobilephone', $info->mobilephone, 'string');
 
 		$request .= '</b:Attributes>
-							<b:EntityState i:nil="true"/>
-							<b:FormattedValues xmlns:c="http://schemas.datacontract.org/2004/07/System.Collections.Generic"/>
-							<b:Id>00000000-0000-0000-0000-000000000000</b:Id>
-							<b:LogicalName>contact</b:LogicalName>
-							<b:RelatedEntities xmlns:c="http://schemas.datacontract.org/2004/07/System.Collections.Generic"/>
-						</entity>
-					</Create>
-					</s:Body>
-					</s:Envelope>';
+		            <b:EntityState i:nil="true" />
+		            <b:FormattedValues xmlns:c="http://schemas.datacontract.org/2004/07/System.Collections.Generic"/>
+		            <b:Id>00000000-0000-0000-0000-000000000000</b:Id>
+		            <b:LogicalName>contact</b:LogicalName>
+		            <b:RelatedEntities xmlns:c="http://schemas.datacontract.org/2004/07/System.Collections.Generic"/>
+		          </c:value>
+		        </b:KeyValuePairOfstringanyType>
+		      </b:Parameters>
+		      <b:RequestId i:nil="true" />
+		      <b:RequestName>Create</b:RequestName>
+				</request>
+			</Execute>
+				</s:Body>
+				</s:Envelope>';
 
-		$response = LiveIDManager::GetSOAPResponse("/Organization.svc", $domainname, self::$organizationServiceURL, $head.$request);
+		/*
+		$request = '<s:Body><Execute xmlns="http://schemas.microsoft.com/xrm/2011/Contracts/Services">
+				<request i:type="b:CreateRequest" xmlns:b="http://schemas.microsoft.com/xrm/2011/Contracts" xmlns:i="http://www.w3.org/2001/XMLSchema-instance">
+		      <b:Parameters xmlns:c="http://schemas.datacontract.org/2004/07/System.Collections.Generic">
+		        <b:KeyValuePairOfstringanyType>
+		          <c:key>Target</c:key>
+		          <c:value i:type="b:Entity">
+					<b:Attributes>
+					  <b:KeyValuePairOfstringanyType>
+		                <c:key>fullname</c:key>
+		                <c:value i:type="d:string" xmlns:d="http://www.w3.org/2001/XMLSchema">Matteo Avanzini</c:value>
+		              </b:KeyValuePairOfstringanyType>
+		              <b:KeyValuePairOfstringanyType>
+		                <c:key>firstname</c:key>
+		                <c:value i:type="d:string" xmlns:d="http://www.w3.org/2001/XMLSchema">Matteo</c:value>
+		              </b:KeyValuePairOfstringanyType>
+		              <b:KeyValuePairOfstringanyType>
+		                <c:key>lastname</c:key>
+		                <c:value i:type="d:string" xmlns:d="http://www.w3.org/2001/XMLSchema">Avanzini</c:value>
+		              </b:KeyValuePairOfstringanyType>
+		            </b:Attributes>
+		            <b:EntityState i:nil="true" />
+		            <b:FormattedValues />
+		            <b:Id>00000000-0000-0000-0000-000000000000</b:Id>
+		            <b:LogicalName>contact</b:LogicalName>
+		            <b:RelatedEntities />
+		          </c:value>
+		        </b:KeyValuePairOfstringanyType>
+		      </b:Parameters>
+		      <b:RequestId i:nil="true" />
+		      <b:RequestName>Create</b:RequestName>
+				</request>
+			</Execute></s:Body></s:Envelope>';
+		*/
+
+		$envelope = $head.$request;
 
 		if ($_DEBUG_MODE) {
 			echo "<pre>";
-			echo var_dump($response);
+			echo $envelope;
 			echo "</pre>";
-			echo "<br/>";
+		}
+
+		$response = LiveIDManager::GetSOAPResponse("/Organization.svc", $domainname, self::$organizationServiceURL, $envelope);
+
+		if ($_DEBUG_MODE) {
+			echo "<pre>";
+			echo $response;
+			echo "</pre>";
 		}
 
 		$createResult ="";
@@ -511,4 +618,93 @@ class DynamicsIntegrator
 		return $accountsArray;
 
 	}
+
+	/**
+	 * @param   resources   array of GUID
+	 */
+	public function checkAvailability($resources, $start_date, $end_date, $start_time = "05:00:00", $end_time = "05:00:00")
+	{
+		$domainname = substr(self::$organizationServiceURL,8,-1);
+		$pos = strpos($domainname, "/");
+		$domainname = substr($domainname,0,$pos);
+
+		$st = new DateTime( $start_time );
+		$st->modify( '-1 hour' );
+		$start_time = $st->format( 'H:i:s' );
+
+		$et = new DateTime( $end_time );
+		$et->modify( '+1 hour' );
+		$end_time = $et->format( 'H:i:s' );
+
+		$head = EntityUtils::getCRMSoapHeader(self::$organizationServiceURL, self::$securityData);
+		$request = '<s:Body>
+                <Execute xmlns="http://schemas.microsoft.com/xrm/2011/Contracts/Services" xmlns:i="http://www.w3.org/2001/XMLSchema-instance">
+                <request i:type="b:QueryMultipleSchedulesRequest" xmlns:a="http://schemas.microsoft.com/xrm/2011/Contracts" xmlns:b="http://schemas.microsoft.com/crm/2011/Contracts">
+                    <a:Parameters xmlns:c="http://schemas.datacontract.org/2004/07/System.Collections.Generic">
+                        <a:KeyValuePairOfstringanyType>
+                            <c:key>ResourceIds</c:key>
+                            <c:value i:type="d:ArrayOfguid" xmlns:d="http://schemas.microsoft.com/2003/10/Serialization/Arrays">';
+		foreach ($resources as $resource)
+			$request .= '<d:guid>'.$resource.'</d:guid>';
+		$request .= '</c:value>
+                        </a:KeyValuePairOfstringanyType>
+                        <a:KeyValuePairOfstringanyType>
+                            <c:key>Start</c:key>
+                            <c:value i:type="d:dateTime" xmlns:d="http://www.w3.org/2001/XMLSchema">'.$start_date.'T'.$start_time.'Z</c:value>
+                        </a:KeyValuePairOfstringanyType>
+                        <a:KeyValuePairOfstringanyType>
+                            <c:key>End</c:key>
+                            <c:value i:type="d:dateTime" xmlns:d="http://www.w3.org/2001/XMLSchema">'.$end_date.'T'.$end_time.'Z</c:value>
+                        </a:KeyValuePairOfstringanyType>
+                        <a:KeyValuePairOfstringanyType>
+                            <c:key>TimeCodes</c:key>
+                            <c:value i:type="d:ArrayOfTimeCode" xmlns:d="http://schemas.microsoft.com/2003/10/Serialization/Arrays">
+                                <d:TimeCode>Available</d:TimeCode>
+                            </c:value>
+                        </a:KeyValuePairOfstringanyType>
+                    </a:Parameters>
+                    <a:RequestId i:nil="true" />
+                    <a:RequestName>QueryMultipleSchedules</a:RequestName>
+                </request>
+                </Execute>
+            </s:Body>
+            </s:Envelope>';
+
+		error_log($request);
+		$response =  LiveIDManager::GetSOAPResponse("/Organization.svc", $domainname, self::$organizationServiceURL, $head.$request);
+		error_log($response);
+
+		$accountsArray = array();
+		if($response!=null && $response!="") {
+
+			$responsedom = new DomDocument();
+			$responsedom->loadXML($response);
+			$entities = $responsedom->getElementsbyTagName("ArrayOfTimeInfo");
+			foreach($entities as $entity) {
+				$reservation = array();
+				$kvptypes = $entity->getElementsbyTagName("TimeInfo");
+				foreach($kvptypes as $kvp) {
+					$start =  $kvp->getElementsbyTagName("Start")->item(0)->textContent;
+					$end =  $kvp->getElementsbyTagName("End")->item(0)->textContent;
+					$timecode =  $kvp->getElementsbyTagName("TimeCode")->item(0)->textContent;
+					$reservation[$start] = $timecode;
+				}
+				$accountsArray[] = $reservation;
+			}
+		} else {
+			return false;
+		}
+
+		return $accountsArray;
+	}
+
+	public function getBooking($guid) {}
+	public function deleteBooking() {}
+
+	public function getTours() {}
+	public function getTour($guid) {}
+
+	public function getContact($guid) {}
+	public function deleteContact() {}
+
 }

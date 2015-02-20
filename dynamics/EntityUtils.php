@@ -3,6 +3,7 @@
 class EntityUtils {
 
     public static function getCRMSoapHeader($CRMURL,$securityData){
+
         date_default_timezone_set('UTC');
         $soapHeader = '
 			<s:Envelope xmlns:s="http://www.w3.org/2003/05/soap-envelope"
@@ -37,8 +38,7 @@ class EntityUtils {
 					  <EncryptedKey>
 						<EncryptionMethod Algorithm="http://www.w3.org/2001/04/xmlenc#rsa-oaep-mgf1p">
 						</EncryptionMethod>
-						<ds:KeyInfo Id="keyinfo">
-						  <wsse:SecurityTokenReference xmlns:wsse="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd">
+						<ds:KeyInfo Id="keyinfo"><wsse:SecurityTokenReference xmlns:wsse="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd">
 							<wsse:KeyIdentifier EncodingType="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-soap-message-security-1.0#Base64Binary"
 							ValueType="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-x509-token-profile-1.0#X509SubjectKeyIdentifier">
 							'.$securityData->getKeyIdentifier().'</wsse:KeyIdentifier>
@@ -99,7 +99,6 @@ class EntityUtils {
 						</EncryptionMethod>
 						<ds:KeyInfo Id="keyinfo">
 						  <wsse:SecurityTokenReference xmlns:wsse="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd">
-	
 							<wsse:KeyIdentifier EncodingType="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-soap-message-security-1.0#Base64Binary"
 							ValueType="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-x509-token-profile-1.0#X509SubjectKeyIdentifier">
 							'.$securityData->getKeyIdentifier().'</wsse:KeyIdentifier>

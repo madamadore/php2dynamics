@@ -50,8 +50,13 @@ class LiveIDManager {
 
         
         $binaryDATokenXML = LiveIDManager::GetSOAPResponse("/extSTS.srf" , "login.live.com" , "https://login.live.com/liveidSTS.srf", $soapTemplate);
+	    // $binaryDATokenXML = LiveIDManager::GetSOAPResponse("/extSTS.srf" , "login.live.com" , "https://65.55.60.123/liveidSTS.srf", $soapTemplate);
         
         preg_match('/<CipherValue>(.*)<\/CipherValue>/', $binaryDATokenXML, $matches);
+
+	    if ( count($matches) < 2 ) {
+		    throw new Exception( "Regiter device fails" );
+	    }
 
 		$cipherValue =  $matches[1];
 
@@ -127,6 +132,7 @@ class LiveIDManager {
 
         $securityTemplate = sprintf($securityTokenSoapTemplate, LiveIDManager::gen_uuid(), LiveIDManager::getCurrentTime(), LiveIDManager::getNextDayTime(), $liveIDUsername, $liveIDPassword, $cipherValue, $URNAddress);
         $securityTokenXML = LiveIDManager::GetSOAPResponse("/extSTS.srf" , "login.microsoftonline.com" , "https://login.microsoftonline.com/extSTS.srf", $securityTemplate);
+	    // $securityTokenXML = LiveIDManager::GetSOAPResponse("/extSTS.srf" , "login.microsoftonline.com" , "https://65.52.228.100/extSTS.srf", $securityTemplate);
 
         $responsedom = new DomDocument();
         $responsedom->loadXML($securityTokenXML);
@@ -191,15 +197,14 @@ class LiveIDManager {
 
 		    curl_setopt($cURLHandle, CURLOPT_URL, $soapUrl);
 	        curl_setopt($cURLHandle, CURLOPT_RETURNTRANSFER, 1);
-	        curl_setopt($cURLHandle, CURLOPT_TIMEOUT, 60);
-	        curl_setopt($cURLHandle, CURLOPT_SSL_VERIFYPEER, false);
+	        curl_setopt($cURLHandle, CURLOPT_TIMEOUT, 1000);
+	        curl_setopt($cURLHandle, CURLOPT_SSL_VERIFYPEER, true);
 	        curl_setopt($cURLHandle, CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_1_1);
 	        curl_setopt($cURLHandle, CURLOPT_HTTPHEADER, $headers);
 	        curl_setopt($cURLHandle, CURLOPT_POST, 1);
 		    curl_setopt($cURLHandle, CURLOPT_HTTPAUTH, CURLAUTH_NTLM);
 	        curl_setopt($cURLHandle, CURLOPT_POSTFIELDS, $content);
-		    curl_setopt($cURLHandle, CURLOPT_TIMEOUT, 1000);
-	        curl_setopt($cURLHandle, CURLOPT_SSLVERSION , 3);
+	        // curl_setopt($cURLHandle, CURLOPT_SSLVERSION , 3);
 
 		    if ( true === $_DEBUG_MODE ) {
 			    echo "<b>Call to </b>" . $soapUrl . "<br/>";
