@@ -11,8 +11,12 @@ echo "Test started<br/>";
 //$integrator = DynamicsIntegrator::getInstance( "website@topbike.onmicrosoft.com", "WS__2k14" );
 $integrator = DynamicsIntegrator::getInstance();
 // testUpdateContact($integrator);
-// testGetContacts($integrator);
+
+testGetServices($integrator);
+testGetContacts($integrator);
+testGetBooking($integrator);
 testCreateBooking($integrator);
+
 // testDeleteContact($integrator);
 // testSecurityData($integrator);
 // testCreateAccount($integrator);

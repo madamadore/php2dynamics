@@ -79,22 +79,35 @@ function testCreateBooking($integrator) {
 	$booking->scheduledend = "2000-03-01 18:00:00";
 	$booking->tb_scheduledbikes = 2;
 	$booking->statecode = DynamicsIntegrator::$_STATE[ "Scheduled" ];
-	// $booking->statuscode = DynamicsIntegrator::$_STATUS[ "Tentative" ];
+	// $booking->statuscode = DynamicsIntegrator::$_STATUS[ "Confirmed" ];
 	$booking->tb_bookingdate = "2000-01-01 20:02:20";
-	$booking->tb_bookingtype = DynamicsIntegrator::$_BOOKING_TYPE;
+	$booking->tb_bookingtype = DynamicsIntegrator::$_BOOKING_TYPE[ "Direct" ];
 	$booking->tb_language = DynamicsIntegrator::$_LANGUAGE[ "IT" ];
 	$booking->tb_servicetype = DynamicsIntegrator::$_SERVICE_TYPE[ "bike_rental" ];
 	$booking->tb_participants = 2;
-	// $booking->regardingobjectid = "47F0189B-1BBA-E111-B50B-D4856451DC79";    // Rimmer's GUID
+	//$booking->regardingobjectid = array( "guid" => "47F0189B-1BBA-E111-B50B-D4856451DC79", "logicalName" => "contact" );    // Rimmer's GUID
+	$booking->regardingobjectid = array( "guid" => "ad4c86fd-f5b8-e411-80d8-c4346bacef70", "logicalName" => "contact" );
 	$booking->tb_totalamount = 40.10;
-	$booking->siteid = DynamicsIntegrator::$_SITE_ID;
-	$booking->serviceid = DynamicsIntegrator::$_SERVICE_ID;
-	$booking->resources = array( "B6099712-571D-E311-AF02-3C4A92DBD80A",
-		                         "F2089712-571D-E311-AF02-3C4A92DBD80A" );
+	$booking->siteid = array( "guid" => DynamicsIntegrator::$_SITE_ID, "logicalName" => "site" );
+	$booking->serviceid = array( "guid" => DynamicsIntegrator::$_SERVICE_ID, "logicalName" => "service" );
+	$booking->resources = array( array( "guid" => "B6099712-571D-E311-AF02-3C4A92DBD80A", "logicalName" => "equipment" ),
+								 array( "guid" => "F2089712-571D-E311-AF02-3C4A92DBD80A", "logicalName" => "equipment" ) );
 
 	$booking_id = $integrator->createBooking( $booking );
 }
 
+function testGetServices($integrator) {
+
+	echo "<br/>";
+	echo "<b>TEST - GET SERVICES</b> - START<br/>";
+
+	$contacts = $integrator->getServices();
+
+	echo "<b>Services</b><br/>";
+	echo "<pre>";
+	var_dump( $contacts );
+	echo "</pre>";
+}
 
 function testCheckAvaibility($integrator) {
 
@@ -141,4 +154,15 @@ function testCheckAvaibility($integrator) {
 	echo "<pre>";
 	echo var_dump( $response );
 	echo "</pre>";
+}
+
+function testGetBooking($integrator) {
+	$guid = "B77C3C8B-E9B8-E411-80D6-C4346BAD7228";
+	$rental = $integrator->getBooking( $guid );
+
+	$guid = "E2142DE0-40BA-E411-80D8-C4346BACEF70";
+	$rental2 = $integrator->getBooking( $guid );
+
+	$guid = "4BFEA247-40BA-E411-80D8-FC15B4280CB8";
+	$rental3 = $integrator->getBooking( $guid );
 }
