@@ -5,6 +5,7 @@ require_once(dirname(__FILE__) . '/dynamics/EntityUtils.php');
 require_once(dirname(__FILE__) . '/entities/Entity.php');
 require_once(dirname(__FILE__) . '/entities/Account.class.php');
 require_once(dirname(__FILE__) . '/entities/Contact.class.php');
+require_once(dirname(__FILE__) . '/entities/Booking.class.php');
 
 /**
  * This class realize the integration bewtween PHP and Microsoft Dynamics.
@@ -34,6 +35,9 @@ class DynamicsIntegrator
 	private static $instance;
 	private static $debug_mode = false;
 
+	public static $_STATE = array( "Open" => "0", "Closed" => "1", "Canceled" => "2", "Scheduled" => 3 );
+	public static $_STATUS = array("Tentative" => "2", "Awaiting Deposit" => "1", "Completed" => "8",
+	                                "Canceled" => "9", "Confirmed" => "4", "In Progress" => "6", "No Show" => "10" );
 	public static $_LANGUAGE = array( "EN"=>"108600000", "NL"=>"108600001", "DE"=>"108600002", "IT"=>"108600003", "ES"=>"108600004" );
 	public static $_SERVICE_TYPE = array( "scheduled_tour"=>"108600000", "private_tour"=>"108600001", "bike_rental"=>"108600002" );
 	public static $_BIKE_PRODUCT_ID = "11447825-AE42-E111-90B4-1CC1DE6D3B23";
@@ -75,14 +79,14 @@ class DynamicsIntegrator
 		return self::$securityData;
 	}
 
-	private function do_entity_array_value($entity) {
+	private function do_entity_array_value($guid, $logicalName = "equipment") {
 		$xml = '<b:Entity>
 					<b:Attributes>
 						<b:KeyValuePairOfstringanyType>
 						<c:key>partyid</c:key>
 						<c:value i:type="b:EntityReference">
-							<b:Id>' . $entity->ID . '</b:Id>
-							<b:LogicalName>equipment</b:LogicalName>
+							<b:Id>' . $guid . '</b:Id>
+							<b:LogicalName>' . $logicalName . '</b:LogicalName>
 							<b:Name i:nil="true" />
 						</c:value>
 						</b:KeyValuePairOfstringanyType>
@@ -93,17 +97,18 @@ class DynamicsIntegrator
 		            <b:LogicalName>activityparty</b:LogicalName>
 		            <b:RelatedEntities />
 				</b:Entity>';
+		// <b:Id>F2089712-571D-E311-AF02-3C4A92DBD80A</b:Id>
 		return $xml;
 	}
 
-	private function do_array_entities_value($key, $arrayOfEntities, $logicalName) {
+	private function do_array_entities_value($key, $arrayOfEntities, $logicalName = "equipment") {
 
 		$xml = '<b:KeyValuePairOfstringanyType>
 					<c:key>'.$key.'</c:key>
 					<c:value i:type="b:ArrayOfEntity">';
 
-		foreach ($arrayOfEntities as $entity) {
-			$xml .= do_entity_array_value($entity);
+		foreach ($arrayOfEntities as $guid) {
+			$xml .= $this->do_entity_array_value( $guid, $logicalName );
 		}
 
 		$xml .= '</c:value>
@@ -115,23 +120,49 @@ class DynamicsIntegrator
 
 		$xml = '<b:KeyValuePairOfstringanyType>
 						<c:key>'.$key.'</c:key>
-						<c:value i:type="b:EntityReference">
-							<b:Id>'.$guid.'</b:Id>
-							<b:LogicalName>'.$logicalName.'</b:LogicalName>
-							<b:Name i:nil="true" />
-						</c:value>
-					</b:KeyValuePairOfstringanyType>';
+						<c:value i:type="b:EntityReference">';
+		$xml .= $this->do_entityreference_content($guid, $logicalName);
+		$xml .= '</c:value>
+				</b:KeyValuePairOfstringanyType>';
+		return $xml;
+	}
+
+	private function do_entityreference_content($guid, $logicalName) {
+		$xml = '<b:Id>'.$guid.'</b:Id>
+				<b:LogicalName>'.$logicalName.'</b:LogicalName>
+				<b:Name i:nil="true" />';
 		return $xml;
 	}
 
 	private function do_generic_value($key, $value, $type) {
 
-		$xml = '<b:KeyValuePairOfstringanyType><c:key>' . $key . '</c:key><c:value i:type="d:' . $type . '" xmlns:d="http://www.w3.org/2001/XMLSchema">'.$value.'</c:value></b:KeyValuePairOfstringanyType>';
+		$xml = '<b:KeyValuePairOfstringanyType>
+					<c:key>' . $key . '</c:key>
+					<c:value i:type="d:' . $type . '" xmlns:d="http://www.w3.org/2001/XMLSchema">'.$value.'</c:value>
+				</b:KeyValuePairOfstringanyType>';
+		return $xml;
+	}
+
+	/**
+	 * @param $value    datetime in format yyyy-MM-dd hh:mm:ss
+	 */
+	private function do_datetime_value($key, $value) {
+		$xml = '';
+		$datevalue = str_replace(" ", "T", $value) . 'Z';
+		return $this->do_generic_value( $key, $datevalue, 'dateTime' );
+	}
+
+	private function do_float_value($key, $value) {
+		$xml = '<b:KeyValuePairOfstringanyType>
+					<c:key>' . $key . '</c:key>
+                    <c:value i:type="b:Float">
+                        <b:Value>' . $value . '</b:Value>
+                    </c:value>
+                </b:KeyValuePairOfstringanyType>';
 		return $xml;
 	}
 
 	private function do_money_value($key, $value) {
-
 		$xml = '<b:KeyValuePairOfstringanyType>
 					<c:key>' . $key . '</c:key>
                     <c:value i:type="b:Money">
@@ -142,7 +173,6 @@ class DynamicsIntegrator
 	}
 
 	private function do_option_value($key, $value) {
-
 		$xml = '<b:KeyValuePairOfstringanyType>
                     <c:key>' . $key . '</c:key>
                     <c:value i:type="b:OptionSetValue">
@@ -157,27 +187,56 @@ class DynamicsIntegrator
 		return $head;
 	}
 
-	private function getHeadBody() {
+	private function getHeadBody($requestName = "Create") {
 		$xml = '<s:Body>
 				<Execute xmlns="http://schemas.microsoft.com/xrm/2011/Contracts/Services">
 				<request i:type="b:CreateRequest" xmlns:b="http://schemas.microsoft.com/xrm/2011/Contracts" xmlns:i="http://www.w3.org/2001/XMLSchema-instance">
 		      	<b:Parameters xmlns:c="http://schemas.datacontract.org/2004/07/System.Collections.Generic">
 		        <b:KeyValuePairOfstringanyType>
-		          <c:key>Target</c:key>
-		          <c:value i:type="b:Entity">
-		              <b:Attributes>';
+		          <c:key>Target</c:key>';
+
+		return $xml;
+	}
+
+
+	private function getHeadRequestBody($requestName = "Create") {
+		switch ($requestName) {
+			case "Update":
+			case "Create":
+				$xml .= '<c:value i:type="b:Entity">
+		              		<b:Attributes>';
+				break;
+			case "Delete":
+				$xml .= '<c:value i:type="b:EntityReference">';
+				break;
+		}
+
+		return $xml;
+	}
+
+	private function getTailRequestBody($entityLogicalName, $requestName = "Create", $guid = "00000000-0000-0000-0000-000000000000") {
+		switch ($requestName) {
+			case "Update":
+			case "Create":
+				$xml .= '</b:Attributes>
+							<b:EntityState i:nil="true" />
+		            		<b:FormattedValues />
+		            		<b:Id>' . $guid . '</b:Id>
+		            		<b:LogicalName>' . $entityLogicalName . '</b:LogicalName>
+		                    <b:RelatedEntities />
+		                </c:value>';
+				break;
+			case "Delete":
+				$xml .= '</c:value>';
+				break;
+		}
+
 		return $xml;
 	}
 
 	private function getTailBody($entityLogicalName, $requestName = "Create") {
-		$xml = '</b:Attributes>
-		            <b:EntityState i:nil="true" />
-		            <b:FormattedValues />
-		            <b:Id>00000000-0000-0000-0000-000000000000</b:Id>
-		            <b:LogicalName>' . $entityLogicalName . '</b:LogicalName>
-		            <b:RelatedEntities />
-		          </c:value>
-		        </b:KeyValuePairOfstringanyType>
+
+		$xml = '</b:KeyValuePairOfstringanyType>
 		      	</b:Parameters>
 		      	<b:RequestId i:nil="true" />
 		      	<b:RequestName>' . $requestName . '</b:RequestName>
@@ -187,37 +246,72 @@ class DynamicsIntegrator
 		return $xml;
 	}
 
-	private function getEntityBody($entity) {
-		$xml = "";
-		foreach ($entity->schema as $key=>$tipology) {
+	private function fetchEntityFields($entity) {
+		$schema = $entity->schema;
+		foreach ( $schema as $key=>$type ) {
+
 			$value = $entity->{$key};
-			switch ($tipology[0]) {
-				case "string":
-					$xml .= $this->do_generic_value($key, $value, "string");
-					break;
-				case "money":
-					$xml .= $this->do_money_value($key, $value);
-					break;
-				case "option":
-					$xml .= $this->do_option_value($key, $value);
-					break;
-				case "guid":
-					$xml .= $this->do_guid_value($key, $value, "string"); // TODO: ??
-					break;
+			if ( false != $value ) {
+				switch ( $type ) {
+
+					case "datetime":
+						$xml .= $this->do_datetime_value( $key, $value );
+						break;
+					case "float":
+						$xml .= $this->do_generic_value( $key, $value, "double" );
+						break;
+					case "guid":
+						$xml .= $this->do_guid_value( $key, $value, $entity->logicalName );
+						break;
+					case "guid_array":
+						$xml .= $this->do_array_entities_value($key, $value, "equipment" );
+						break;
+					case "int":
+						$xml .= $this->do_generic_value( $key, $value, "int" );
+						break;
+					case "money":
+						$xml .= $this->do_money_value( $key, $value );
+						break;
+					case "option":
+						$xml .= $this->do_option_value( $key, $value );
+						break;
+					case "string":
+						$xml .= $this->do_generic_value( $key, $value, "string" );
+						break;
+
+				}
 			}
 		}
 
 		return $xml;
 	}
 
-	private function doCreateRequest($entity) {
+	private function getEntityBody($entity, $requestName = "Create", $guid = "00000000-0000-0000-0000-000000000000") {
+
+		switch ($requestName) {
+			case "Update":
+			case "Create":
+				$xml = $this->fetchEntityFields( $entity );
+				break;
+			case "Delete":
+				$xml = $this->do_entityreference_content( $guid, $entity->logicalName );
+				break;
+		}
+
+		return $xml;
+
+	}
+
+	private function doRequest($entity, $requestName = "Create", $guid = "00000000-0000-0000-0000-000000000000") {
 
 		global $_DEBUG_MODE;
 
 		$head = $this->getRequestHeaders();
-		$body = $this->getHeadBody();
-		$body .= $this->getEntityBody($entity);
-		$body .= $this->getTailBody($entity->logicalName);
+		$body = $this->getHeadBody( $requestName );
+		$body .= $this->getHeadRequestBody( $requestName );
+		$body .= $this->getEntityBody( $entity, $requestName, $guid );
+		$body .= $this->getTailRequestBody( $entity->logicalName, $requestName, $guid );
+		$body .= $this->getTailBody( $entity->logicalName, $requestName );
 
 		$domainname = substr(DynamicsIntegrator::$organizationServiceURL,8,-1);
 		$pos = strpos($domainname, "/");
@@ -226,7 +320,9 @@ class DynamicsIntegrator
 		$envelope = $head.$body;
 
 		if ($_DEBUG_MODE) {
+			echo "<pre>";
 			echo $envelope;
+			echo "</pre>";
 			echo "<br/>";
 		}
 
@@ -240,318 +336,62 @@ class DynamicsIntegrator
 		return $response;
 	}
 
-	public function createBooking($info) {
-		$domainname = substr(self::$organizationServiceURL,8,-1);
-		$pos = strpos($domainname, "/");
-		$domainname = substr($domainname,0,$pos);
+	public function createBooking($booking) {
 
-		$head = EntityUtils::getCreateCRMSoapHeader(self::$organizationServiceURL, self::$securityData);
-		$request = '<s:Body>
-                    <Create xmlns="http://schemas.microsoft.com/xrm/2011/Contracts/Services">
-                    <entity xmlns:b="http://schemas.microsoft.com/xrm/2011/Contracts" xmlns:i="http://www.w3.org/2001/XMLSchema-instance">
-                        <b:Attributes xmlns:c="http://schemas.datacontract.org/2004/07/System.Collections.Generic">';
+		$response = $this->doRequest($booking);
 
-		$request .= $this->do_generic_value('subject', $info->subject, 'string');
-		$request .= $this->do_generic_value('tp_bookingcode', $info->bookingcode, 'string');
-		$request .= $this->do_generic_value('description', $info->description, 'string');
-		$request .= $this->do_generic_value('tb_materialdetails', $info->materialdetails, 'string');
-		$request .= $this->do_generic_value('scheduledstart', str_replace(" ", "T", $info->scheduledstart) . 'Z', 'dateTime');
-		$request .= $this->do_generic_value('scheduledend', str_replace(" ", "T", $info->scheduledend) . 'Z', 'dateTime');
-		$request .= $this->do_generic_value('tb_bookingdate', str_replace(" ", "T", $info->bookingdate) . 'Z', 'dateTime');
-		$request .= $this->do_generic_value('tb_participants', str_replace(" ", "T", $info->participants) . 'Z', 'int');
+		$responsedom = new DomDocument();
+		$responsedom->loadXML($response);
+		$nodes = $responsedom->getElementsbyTagName("keyvaluepairofstringanytype");
 
-		$request .= $this->do_money_value('tb_topbikerevenue', $info->revenue);
+		echo "-------";
+		echo var_dump($nodes);
+		echo "-------";
 
-		if ($info->tourprice) {
-			$request .= $this->do_money_value('tb_tourprice', $info->tourprice);
+		$created_id = false;
+		foreach ($nodes as $node) {
+			echo $node->textContent;
+			$created_id =  $node->getElementsbyTagName("c:value")->item(0)->textContent;
 		}
 
-		$request .= $this->do_money_value('tb_deposit', $info->deposit);
-		$request .= $this->do_money_value('tb_tourprice', $info->tourprice);
-		$request .= $this->do_money_value('tb_openamount', $info->openamount);
-
-		if ($info->tourid) {
-			$request .= $this->do_guid_value( 'tb_tourid', $info->tourid, 'tb_tour' );
-		}
-		$request .= $this->do_guid_value('tb_productid', $info->productid, 'product');
-
-		$request .= $this->do_option_value( 'tb_servicetype', $info->servicetype );
-
-		if ($info->language) {
-			$request .= $this->do_option_value( 'tb_language', $info->language );
-		}
-
-		if ($info->regardingobjectid!=null) {
-			$request .= $this->do_guid_value('regardingobjectid', $info->regardingobjectid, 'contact');
-		}
-
-		$request .= $this->do_guid_value('siteid', $info->siteid, 'site');
-		$request .= $this->do_guid_value('serviceid', $info->serviceid, 'service');
-
-		$request .= $this->do_option_value( 'tb_bookingtype', $info->bookingtype );
-
-		if (count($info->resources) > 0) {
-			$request .= '
-			<b:KeyValuePairOfstringanyType>
-					<c:key>resources</c:key>
-					<c:value i:type="b:ArrayOfEntity">';
-			foreach ($info->resources as $resource) {
-				/*
-				$requesta .= '<a:Entity>
-							   <a:Attributes>
-							   <a:KeyValuePairOfstringanyType>
-								 <b:key>resourceid</b:key>
-								 <b:value i:type="a:EntityReference">
-								   <a:Id>'.$resource.'</a:Id>
-								   <a:LogicalName>materials</a:LogicalName>
-								   <a:Name i:nil="true" />
-								 </b:value>
-							   </a:KeyValuePairOfstringanyType>
-							   </a:Attributes>
-							   <a:EntityState i:nil="true" />
-							   <a:FormattedValues />
-							   <a:Id>00000000-0000-0000-0000-000000000000</a:Id>
-							   <a:LogicalName>equipment</a:LogicalName>
-							   <a:RelatedEntities />
-					</a:Entity>';
-					*/
-				$request .='
-								<a:Entity>
-									       <a:Attributes />
-									       <a:EntityState i:nil="true" />
-									       <a:FormattedValues />
-									       <a:Id>'.$resource.'</a:Id>
-									       <a:LogicalName>equipment</a:LogicalName>
-									       <a:RelatedEntities />
-								</a:Entity>
-						';
-			}
-			$request .= 	'</c:value>
-				</b:KeyValuePairOfstringanyType>';
-			/*
-						$request .= '<b:KeyValuePairOfstringanyType>
-										<c:key>resources</c:key>
-										<c:value
-											i:type="d:ArrayOfguid"
-											xmlns:d="http://schemas.microsoft.com/2003/10/Serialization/Arrays">';
-							foreach ($info->resources as $resource) {
-								$request .= '<d:guid>'.$resource.'</d:guid>';
-							}
-						   $request .= '</c:value></b:KeyValuePairOfstringanyType>';
-			 */
-		}
-		$request .= '
-			</b:Attributes>
-                        <b:EntityState i:nil="true"/>
-                        <b:FormattedValues xmlns:c="http://schemas.datacontract.org/2004/07/System.Collections.Generic"/>
-                        <b:Id>00000000-0000-0000-0000-000000000000</b:Id>
-                        <b:LogicalName>serviceappointment</b:LogicalName>
-                        <b:RelatedEntities xmlns:c="http://schemas.datacontract.org/2004/07/System.Collections.Generic"/>
-                    </entity>
-                    </Create>
-                </s:Body>
-            </s:Envelope>';
-
-		$response =  LiveIDManager::GetSOAPResponse("/Organization.svc", $domainname, self::$organizationServiceURL, $head.$request);
-
-		$createResult ="";
-		if($response!=null && $response!="") {
-			preg_match('/<CreateResult>(.*)<\/CreateResult>/', $response, $matches);
-			if (count($matches) > 0) {
-				$createResult = $matches[1];
-				// error_log("Reservation creata. GUID: ".$createResult);
-			}
-		} else {
-			$createResult = false;
-		}
-
-		return $createResult;
+		return $created_id;
 	}
 
-	public function createAccountBis($account) {
+	public function updateContact($contact, $guid) {
 
-		return $this->doCreateRequest($account);
-	}
-	/**
-	 */
-	public function createAccount($info) {
-		global $_DEBUG_MODE;
+		$response = $this->doRequest( $contact, "Update", $guid );
 
-		$xml='<Execute xmlns="http://schemas.microsoft.com/xrm/2011/Contracts/Services">
-				<request i:type="b:CreateRequest" xmlns:b="http://schemas.microsoft.com/xrm/2011/Contracts" xmlns:i="http://www.w3.org/2001/XMLSchema-instance">
-		      <b:Parameters xmlns:c="http://schemas.datacontract.org/2004/07/System.Collections.Generic">
-		        <b:KeyValuePairOfstringanyType>
-		          <c:key>Target</c:key>
-		          <c:value i:type="b:Entity">
-		              <b:Attributes>
-		              <b:KeyValuePairOfstringanyType>
-		                <c:key>name</c:key>
-		                <c:value i:type="d:string" xmlns:d="http://www.w3.org/2001/XMLSchema">test account</c:value>
-		              </b:KeyValuePairOfstringanyType>
-		            </b:Attributes>
-		            <b:EntityState i:nil="true" />
-		            <b:FormattedValues />
-		            <b:Id>00000000-0000-0000-0000-000000000000</b:Id>
-		            <b:LogicalName>account</b:LogicalName>
-		            <b:RelatedEntities />
-		          </c:value>
-		        </b:KeyValuePairOfstringanyType>
-		      </b:Parameters>
-		      <b:RequestId i:nil="true" />
-		      <b:RequestName>Create</b:RequestName>
-				</request>
-			</Execute>';
-
-		$head = EntityUtils::getCRMSoapHeader(DynamicsIntegrator::$organizationServiceURL, DynamicsIntegrator::$securityData);
-
-		$req_xml= "<s:Body>";
-		$req_xml.= $xml;
-		$req_xml.= "</s:Body>";
-		$req_xml.= '</s:Envelope>';
-
-		$domainname = substr(DynamicsIntegrator::$organizationServiceURL,8,-1);
-		$pos = strpos($domainname, "/");
-		$domainname = substr($domainname,0,$pos);
-
-		$envelope = $head.$req_xml;
-
-		if ($_DEBUG_MODE) {
-			echo "<pre>";
-			echo $envelope;
-			echo "</pre>";
+		$responsedom = new DomDocument();
+		$responsedom->loadXML($response);
+		$nodes = $responsedom->getElementsbyTagName("b:keyvaluepairofstringanytype");
+		$created_id = false;
+		foreach ($nodes as $node) {
+			$created_id =  $node->getElementsbyTagName("c:value")->item(0)->textContent;
 		}
 
-		$response =  LiveIDManager::GetSOAPResponse("/Organization.svc", $domainname, DynamicsIntegrator::$organizationServiceURL, $envelope);
-
-		if ($_DEBUG_MODE) {
-			echo $response;
-			echo "<br/>";
-		}
-
-		$createResult ="";
-		if($response!=null && $response!=false) {
-			preg_match('/<CreateResult>(.*)<\/CreateResult>/', $response, $matches);
-			if ( count($matches) > 0 ) {
-				$createResult = $matches[1];
-				// error_log("Contact creato. GUID: ".$createResult);
-			} else {
-				$createResult = false;
-			}
-		} else {
-			$createResult = false;
-		}
-
-		return $createResult;
+		return $created_id;
 	}
 
-	public function createContact($info) {
+	public function createContact($contact) {
 
-		global $_DEBUG_MODE;
+		$response = $this->doRequest($contact);
 
-		$domainname = substr(self::$organizationServiceURL,8,-1);
-		$pos = strpos($domainname, "/");
-		$domainname = substr($domainname,0,$pos);
-
-		$head = EntityUtils::getCRMSoapHeader(DynamicsIntegrator::$organizationServiceURL, DynamicsIntegrator::$securityData);
-		// $head = EntityUtils::getCreateCRMSoapHeader(self::$organizationServiceURL, self::$securityData);
-
-		$request = '<s:Body>
-					<Execute xmlns="http://schemas.microsoft.com/xrm/2011/Contracts/Services">
-				<request i:type="b:CreateRequest" xmlns:b="http://schemas.microsoft.com/xrm/2011/Contracts" xmlns:i="http://www.w3.org/2001/XMLSchema-instance">
-		      <b:Parameters xmlns:c="http://schemas.datacontract.org/2004/07/System.Collections.Generic">
-		        <b:KeyValuePairOfstringanyType>
-		          <c:key>Target</c:key>
-		          <c:value i:type="b:Entity">
-		              <b:Attributes>';
-
-		$request .= $this->do_generic_value('fullname', $info->firstname . " " . $info->lastname, 'string');
-		$request .= $this->do_generic_value('firstname', $info->firstname, 'string');
-		$request .= $this->do_generic_value('lastname', $info->lastname, 'string');
-		//$request .= $this->do_generic_value('emailaddress', $info->emailaddress, 'string');
-		//$request .= $this->do_generic_value('mobilephone', $info->mobilephone, 'string');
-
-		$request .= '</b:Attributes>
-		            <b:EntityState i:nil="true" />
-		            <b:FormattedValues xmlns:c="http://schemas.datacontract.org/2004/07/System.Collections.Generic"/>
-		            <b:Id>00000000-0000-0000-0000-000000000000</b:Id>
-		            <b:LogicalName>contact</b:LogicalName>
-		            <b:RelatedEntities xmlns:c="http://schemas.datacontract.org/2004/07/System.Collections.Generic"/>
-		          </c:value>
-		        </b:KeyValuePairOfstringanyType>
-		      </b:Parameters>
-		      <b:RequestId i:nil="true" />
-		      <b:RequestName>Create</b:RequestName>
-				</request>
-			</Execute>
-				</s:Body>
-				</s:Envelope>';
-
-		/*
-		$request = '<s:Body><Execute xmlns="http://schemas.microsoft.com/xrm/2011/Contracts/Services">
-				<request i:type="b:CreateRequest" xmlns:b="http://schemas.microsoft.com/xrm/2011/Contracts" xmlns:i="http://www.w3.org/2001/XMLSchema-instance">
-		      <b:Parameters xmlns:c="http://schemas.datacontract.org/2004/07/System.Collections.Generic">
-		        <b:KeyValuePairOfstringanyType>
-		          <c:key>Target</c:key>
-		          <c:value i:type="b:Entity">
-					<b:Attributes>
-					  <b:KeyValuePairOfstringanyType>
-		                <c:key>fullname</c:key>
-		                <c:value i:type="d:string" xmlns:d="http://www.w3.org/2001/XMLSchema">Matteo Avanzini</c:value>
-		              </b:KeyValuePairOfstringanyType>
-		              <b:KeyValuePairOfstringanyType>
-		                <c:key>firstname</c:key>
-		                <c:value i:type="d:string" xmlns:d="http://www.w3.org/2001/XMLSchema">Matteo</c:value>
-		              </b:KeyValuePairOfstringanyType>
-		              <b:KeyValuePairOfstringanyType>
-		                <c:key>lastname</c:key>
-		                <c:value i:type="d:string" xmlns:d="http://www.w3.org/2001/XMLSchema">Avanzini</c:value>
-		              </b:KeyValuePairOfstringanyType>
-		            </b:Attributes>
-		            <b:EntityState i:nil="true" />
-		            <b:FormattedValues />
-		            <b:Id>00000000-0000-0000-0000-000000000000</b:Id>
-		            <b:LogicalName>contact</b:LogicalName>
-		            <b:RelatedEntities />
-		          </c:value>
-		        </b:KeyValuePairOfstringanyType>
-		      </b:Parameters>
-		      <b:RequestId i:nil="true" />
-		      <b:RequestName>Create</b:RequestName>
-				</request>
-			</Execute></s:Body></s:Envelope>';
-		*/
-
-		$envelope = $head.$request;
-
-		if ($_DEBUG_MODE) {
-			echo "<pre>";
-			echo $envelope;
-			echo "</pre>";
+		$responsedom = new DomDocument();
+		$responsedom->loadXML($response);
+		$nodes = $responsedom->getElementsbyTagName("b:keyvaluepairofstringanytype");
+		$created_id = false;
+		foreach ($nodes as $node) {
+			$created_id =  $node->getElementsbyTagName("c:value")->item(0)->textContent;
 		}
 
-		$response = LiveIDManager::GetSOAPResponse("/Organization.svc", $domainname, self::$organizationServiceURL, $envelope);
-
-		if ($_DEBUG_MODE) {
-			echo "<pre>";
-			echo $response;
-			echo "</pre>";
-		}
-
-		$createResult ="";
-		if($response!=null && $response!=false) {
-			preg_match('/<CreateResult>(.*)<\/CreateResult>/', $response, $matches);
-			if ( count($matches) > 0 ) {
-				$createResult = $matches[1];
-				// error_log("Contact creato. GUID: ".$createResult);
-			} else {
-				$createResult = false;
-			}
-		} else {
-			$createResult = false;
-		}
-
-		return $createResult;
+		return $created_id;
 	}
+
+	public function deleteContact($guid) {
+		$response = $this->doRequest( $contact, "Delete", $guid );
+	}
+
+	public function getTours($start_date, $end_date, $language, $product_id) {}
 
 	public function getContacts() {
 
@@ -561,28 +401,57 @@ class DynamicsIntegrator
 		$pos = strpos($domainname, "/");
 		$domainname = substr($domainname,0,$pos);
 
-		$head = EntityUtils::getCreateCRMSoapHeader(self::$organizationServiceURL, self::$securityData);
+		$head = EntityUtils::getCRMSoapHeader(self::$organizationServiceURL, self::$securityData);
 
 		$request = '<s:Body>
-						<RetrieveMultiple xmlns="http://schemas.microsoft.com/xrm/2011/Contracts/Services">
-							<query i:type="b:QueryExpression"
-									xmlns:b="http://schemas.microsoft.com/xrm/2011/Contracts"
-									xmlns:i="http://www.w3.org/2001/XMLSchema-instance">
-								<b:ColumnSet>
-									<b:AllColumns>true</b:AllColumns>
-								</b:ColumnSet>
-								<b:Distinct>false</b:Distinct>
-								<b:EntityName>Contact</b:EntityName>
-								<b:LinkEntities />
-								<b:Orders />
-								<b:PageInfo>
-									<b:Count>0</b:Count>
-									<b:PageNumber>0</b:PageNumber>
-									<b:PagingCookie i:nil="true" />
-									<b:ReturnTotalRecordCount>false</b:ReturnTotalRecordCount>
-								</b:PageInfo>
-							</query>
-						</RetrieveMultiple>
+						<Execute xmlns="http://schemas.microsoft.com/xrm/2011/Contracts/Services" xmlns:i="http://www.w3.org/2001/XMLSchema-instance">
+					      <request i:type="a:RetrieveMultipleRequest" xmlns:a="http://schemas.microsoft.com/xrm/2011/Contracts">
+					        <a:Parameters xmlns:b="http://schemas.datacontract.org/2004/07/System.Collections.Generic">
+					          <a:KeyValuePairOfstringanyType>
+					            <b:key>Query</b:key>
+					            <b:value i:type="a:QueryExpression">
+					              <a:ColumnSet>
+					                <a:AllColumns>false</a:AllColumns>
+					                <a:Columns xmlns:c="http://schemas.microsoft.com/2003/10/Serialization/Arrays">
+                  						<c:string>fullname</c:string>
+                  						<c:string>emailaddress1</c:string>
+                					</a:Columns>
+					              </a:ColumnSet>
+
+									<a:Criteria>
+				                      <a:Filters>
+				                        <a:FilterExpression>
+				                          <a:Conditions>
+				                            <a:ConditionExpression>
+				                              <a:AttributeName>fullname</a:AttributeName>
+				                              <a:Operator>Equal</a:Operator>
+				                              <a:Values xmlns:b="http://schemas.microsoft.com/2003/10/Serialization/Arrays">
+				                                <b:anyType i:type="c:string" xmlns:c="http://www.w3.org/2001/XMLSchema">User Test</b:anyType>
+				                              </a:Values>
+				                            </a:ConditionExpression>
+				                          </a:Conditions>
+				                        </a:FilterExpression>
+				                      </a:Filters>
+				                    </a:Criteria>
+
+					              <a:Distinct>false</a:Distinct>
+					              <a:EntityName>contact</a:EntityName>
+					              <a:LinkEntities/>
+					              <a:Orders />
+					              <a:PageInfo>
+					                <a:Count>0</a:Count>
+					                <a:PageNumber>0</a:PageNumber>
+					                <a:PagingCookie i:nil="true" />
+					                <a:ReturnTotalRecordCount>false</a:ReturnTotalRecordCount>
+					              </a:PageInfo>
+					              <a:NoLock>false</a:NoLock>
+					            </b:value>
+					          </a:KeyValuePairOfstringanyType>
+					        </a:Parameters>
+					        <a:RequestId i:nil="true" />
+					        <a:RequestName>RetrieveMultiple</a:RequestName>
+					      </request>
+					    </Execute>
 					</s:Body></s:Envelope>';
 
 		$response = LiveIDManager::GetSOAPResponse("/Organization.svc", $domainname, self::$organizationServiceURL, $head.$request);
@@ -619,21 +488,39 @@ class DynamicsIntegrator
 
 	}
 
+	private function validateDate($date) {
+		$mysql_dattime_regex = "/^(((\d{4})(-)(0[13578]|10|12)(-)(0[1-9]|[12][0-9]|3[01]))|((\d{4})(-)(0[469]|1‌​1)(-)([0][1-9]|[12][0-9]|30))|((\d{4})(-)(02)(-)(0[1-9]|1[0-9]|2[0-8]))|(([02468]‌​[048]00)(-)(02)(-)(29))|(([13579][26]00)(-)(02)(-)(29))|(([0-9][0-9][0][48])(-)(0‌​2)(-)(29))|(([0-9][0-9][2468][048])(-)(02)(-)(29))|(([0-9][0-9][13579][26])(-)(02‌​)(-)(29)))(\s([0-1][0-9]|2[0-4]):([0-5][0-9]):([0-5][0-9]))$/";
+
+		if ( ! preg_match($mysql_dattime_regex, $date)) {
+			error_log("start_date in formato non valido. Deve essere yyyy-mm-dd hh:mm:ss");
+			return false;
+		} else {
+			$dates = explode(" ", trim( $date ));
+			$date_part = $dates[0];
+			$time_part = $dates[1];
+		}
+
+		return array( $date_part, $time_part );
+	}
+
 	/**
 	 * @param   resources   array of GUID
 	 */
-	public function checkAvailability($resources, $start_date, $end_date, $start_time = "05:00:00", $end_time = "05:00:00")
+	public function checkAvailability($resources, $start_date, $end_date, $gap = "1 hour")
 	{
+		list($start_date, $start_time) = $this->validatedate( $start_date );
+		list($end_date, $end_time) = $this->validatedate( $end_date );
+
 		$domainname = substr(self::$organizationServiceURL,8,-1);
 		$pos = strpos($domainname, "/");
 		$domainname = substr($domainname,0,$pos);
 
 		$st = new DateTime( $start_time );
-		$st->modify( '-1 hour' );
+		$st->modify( '-' . $gap );
 		$start_time = $st->format( 'H:i:s' );
 
 		$et = new DateTime( $end_time );
-		$et->modify( '+1 hour' );
+		$et->modify( '+' . $gap );
 		$end_time = $et->format( 'H:i:s' );
 
 		$head = EntityUtils::getCRMSoapHeader(self::$organizationServiceURL, self::$securityData);
@@ -670,9 +557,12 @@ class DynamicsIntegrator
             </s:Body>
             </s:Envelope>';
 
-		error_log($request);
+		echo "<pre>";
+		echo $request;
+		echo "</pre>";
+
 		$response =  LiveIDManager::GetSOAPResponse("/Organization.svc", $domainname, self::$organizationServiceURL, $head.$request);
-		error_log($response);
+		error_log("<pre>" . $response . "</pre>");
 
 		$accountsArray = array();
 		if($response!=null && $response!="") {
@@ -680,16 +570,31 @@ class DynamicsIntegrator
 			$responsedom = new DomDocument();
 			$responsedom->loadXML($response);
 			$entities = $responsedom->getElementsbyTagName("ArrayOfTimeInfo");
+			$counter = 0;
 			foreach($entities as $entity) {
 				$reservation = array();
+				$available = true;
 				$kvptypes = $entity->getElementsbyTagName("TimeInfo");
 				foreach($kvptypes as $kvp) {
 					$start =  $kvp->getElementsbyTagName("Start")->item(0)->textContent;
 					$end =  $kvp->getElementsbyTagName("End")->item(0)->textContent;
 					$timecode =  $kvp->getElementsbyTagName("TimeCode")->item(0)->textContent;
-					$reservation[$start] = $timecode;
+					$effort =  $kvp->getElementsbyTagName("Effort")->item(0)->textContent;
+
+					if ($timecode != "Available") {
+						$available = false;
+					}
+
+					$reservation[] = array ( "status" => $timecode,
+					                         "start" => $start,
+					                         "end" => $end,
+					                         "effort" => $effort );
 				}
-				$accountsArray[] = $reservation;
+				$guid = $resources[ $counter ];
+
+				$avaibilityReponse = array( "avaibility" => $available, "details" => $reservation);
+				$accountsArray[ $guid ] = $avaibilityReponse;
+				$counter++;
 			}
 		} else {
 			return false;
@@ -701,10 +606,8 @@ class DynamicsIntegrator
 	public function getBooking($guid) {}
 	public function deleteBooking() {}
 
-	public function getTours() {}
 	public function getTour($guid) {}
 
 	public function getContact($guid) {}
-	public function deleteContact() {}
 
 }

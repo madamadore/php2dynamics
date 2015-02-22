@@ -1,6 +1,7 @@
 <?php
 
 class Entity {
-	private $logicalName;
-	private $schema;
+	var $id;
+	var $logicalName;
+	var $schema;
 }

@@ -2,13 +2,12 @@
 
 class Account extends Entity {
 
-	public $logicalName = "account";
-	public $schema = array(
-						"name"=>array("string")
-						);
-	public $name;
+	var $logicalName = "account";
+	var $schema = array("name" => "string" );
+	var $validate = array( "required" => "name" );
+	var $name;
 
-	function __construct($name) {
+	public function __construct($name) {
 		$this->name = $name;
 	}
 

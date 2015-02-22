@@ -85,7 +85,7 @@ class EntityUtils {
 				<o:Security s:mustUnderstand="1"
 				xmlns:o="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd">
 				  <u:Timestamp u:Id="_0">
-					<u:Created>'.  LiveIDManager::getCurrentTime().'Z</u:Created>
+					<u:Created>'.LiveIDManager::getCurrentTime().'Z</u:Created>
 					<u:Expires>'.LiveIDManager::getNextDayTime().'Z</u:Expires>
 				  </u:Timestamp>
 				  <EncryptedData Id="Assertion0"
@@ -105,14 +105,12 @@ class EntityUtils {
 						  </wsse:SecurityTokenReference>
 						</ds:KeyInfo>
 						<CipherData>
-						  <CipherValue>
-						  '.$securityData->getSecurityToken0().'</CipherValue>
+						  <CipherValue>'.$securityData->getSecurityToken0().'</CipherValue>
 						</CipherData>
 					  </EncryptedKey>
 					</ds:KeyInfo>
 					<CipherData>
-					  <CipherValue>
-					  '.$securityData->getSecurityToken1().'</CipherValue>
+					  <CipherValue>'.$securityData->getSecurityToken1().'</CipherValue>
 					</CipherData>
 				  </EncryptedData>
 				</o:Security>

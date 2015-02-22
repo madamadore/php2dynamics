@@ -33,10 +33,10 @@ class TopBikeDynamicsIntegrator
 require "class/EntityUtils.php";
 require "class/LiveIDManager.php";
 
-#$request = get_contact();
-#$request = get_account("roma");
+$request = get_contact();
+$request = get_account("roma");
 #$request = create_account();
-$request = create_appointment();
+#$request = create_appointment();
 #$request = get_appointment();
 
 function make_query($xml) {
