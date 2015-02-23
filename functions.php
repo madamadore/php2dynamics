@@ -75,17 +75,14 @@ function testCreateBooking($integrator) {
 	echo "<b>TEST - CREATE BOOKING</b>";
 
 	$booking = new Booking("Bike Rental Test");
-	$booking->scheduledstart = "2000-03-01 14:00:00";
-	$booking->scheduledend = "2000-03-01 18:00:00";
+	$booking->scheduledstart = "2000-03-01 13:00:00";
+	$booking->scheduledend = "2000-03-01 17:00:00";
 	$booking->tb_scheduledbikes = 2;
-	$booking->statecode = DynamicsIntegrator::$_STATE[ "Scheduled" ];
-	// $booking->statuscode = DynamicsIntegrator::$_STATUS[ "Confirmed" ];
 	$booking->tb_bookingdate = "2000-01-01 20:02:20";
-	$booking->tb_bookingtype = DynamicsIntegrator::$_BOOKING_TYPE[ "Direct" ];
-	$booking->tb_language = DynamicsIntegrator::$_LANGUAGE[ "IT" ];
-	$booking->tb_servicetype = DynamicsIntegrator::$_SERVICE_TYPE[ "bike_rental" ];
+	$booking->tb_bookingtype = array( "value" =>DynamicsIntegrator::$_BOOKING_TYPE[ "Web" ], "type"=>"string" );
+	$booking->tb_language = array( "value" =>DynamicsIntegrator::$_LANGUAGE[ "IT" ], "type"=>"string" );
+	$booking->tb_servicetype = array( "value" =>DynamicsIntegrator::$_SERVICE_TYPE[ "bike_rental" ], "type"=>"string" );
 	$booking->tb_participants = 2;
-	//$booking->regardingobjectid = array( "guid" => "47F0189B-1BBA-E111-B50B-D4856451DC79", "logicalName" => "contact" );    // Rimmer's GUID
 	$booking->regardingobjectid = array( "guid" => "ad4c86fd-f5b8-e411-80d8-c4346bacef70", "logicalName" => "contact" );
 	$booking->tb_totalamount = 40.10;
 	$booking->siteid = array( "guid" => DynamicsIntegrator::$_SITE_ID, "logicalName" => "site" );

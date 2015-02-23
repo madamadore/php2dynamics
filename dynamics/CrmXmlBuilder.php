@@ -88,19 +88,19 @@ class CrmXmlBuilder {
 
 		list($guid, $logicalName) = $this->do_guid_array( $value );
 
-		$xml = '<b:KeyValuePairOfstringanyType>
-						<c:key>'.$key.'</c:key>
-						<c:value i:type="b:EntityReference">';
-		$xml .= $this->do_entityreference_content($guid, $logicalName);
-		$xml .= '</c:value>
-				</b:KeyValuePairOfstringanyType>';
+		$xml = $this->do_entityreference_value( $key, $guid, $logicalName );
 		return $xml;
 	}
 
-	private function do_entityreference_content($guid, $logicalName) {
-		$xml = '<b:Id>'.$guid.'</b:Id>
-				<b:LogicalName>'.$logicalName.'</b:LogicalName>
-				<b:Name i:nil="true" />';
+	private function do_entityreference_value($key, $guid, $logicalName) {
+		$xml =      '<b:KeyValuePairOfstringanyType>
+						<c:key>'.$key.'</c:key>
+						<c:value i:type="b:EntityReference">
+							<b:Id>'.$guid.'</b:Id>
+							<b:LogicalName>'.$logicalName.'</b:LogicalName>
+							<b:Name i:nil="true" />
+						</c:value>
+					</b:KeyValuePairOfstringanyType>';
 		return $xml;
 	}
 
@@ -142,12 +142,15 @@ class CrmXmlBuilder {
 		return $xml;
 	}
 
-	private function do_option_value($key, $value) {
+	private function do_option_value($key, $array) {
+
+		$value = $array[ "value" ];
+		$type = $array[ "type" ];
 		$xml = '<b:KeyValuePairOfstringanyType>
                     <c:key>' . $key . '</c:key>
                     <c:value i:type="b:OptionSetValue">
                         <b:Value>' . $value . '</b:Value>
-                    </c:value>
+					</c:value>
                 </b:KeyValuePairOfstringanyType>';
 		return $xml;
 	}
@@ -286,7 +289,7 @@ class CrmXmlBuilder {
 				$xml = $this->fetchEntityFields( $entity );
 				break;
 			case "Delete":
-				$xml = $this->do_entityreference_content( $guid, $entity->logicalName );
+				//TODO: rifare: $xml = $this->do_entityreference_content( $guid, $entity->logicalName );
 				break;
 		}
 

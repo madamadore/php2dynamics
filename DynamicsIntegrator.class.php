@@ -37,7 +37,7 @@ class DynamicsIntegrator
 	private static $debug_mode = false;
 
 	public static $_STATE = array( "Open" => "0", "Closed" => "1", "Canceled" => "2", "Scheduled" => "3" );
-	public static $_STATUS = array("Tentative" => "2", "Awaiting Deposit" => "1", "Completed" => "8",
+	public static $_STATUS = array( "Tentative" => "2", "Awaiting Deposit" => "1", "Completed" => "8",
 	                                "Canceled" => "9", "Confirmed" => "4", "In Progress" => "6", "No Show" => "10" );
 	public static $_LANGUAGE = array( "EN" => "108600000", "NL" => "108600001", "DE" => "108600002", "IT" => "108600003", "ES" => "108600004" );
 	public static $_SERVICE_TYPE = array( "scheduled_tour" => "108600000", "private_tour" => "108600001", "bike_rental" => "108600002" );
@@ -82,25 +82,91 @@ class DynamicsIntegrator
 		return self::$securityData;
 	}
 
-	public function createBooking($booking) {
+	public function createBooking($booking, $state="Scheduled", $status = "Confirmed") {
 
-		$response = $this->doRequest($booking);
+		$response = $this->doRequest( $booking );
+		$guid = $this->getCreatedId( $response );
+		$this->setState( $state, $status, $guid, 'serviceappointment' );
 
+		return $createdId;
+	}
+
+	private function getCreatedId($response) {
 		$responsedom = new DomDocument();
 		$responsedom->loadXML($response);
-		$nodes = $responsedom->getElementsbyTagName("keyvaluepairofstringanytype");
 
-		echo "-------";
-		echo var_dump($nodes);
-		echo "-------";
+		$fault = $responsedom->getElementsbyTagName("fault");
 
-		$created_id = false;
-		foreach ($nodes as $node) {
-			echo $node->textContent;
-			$created_id =  $node->getElementsbyTagName("c:value")->item(0)->textContent;
+		if ( count( (array) $fault) > 0 ) {
+
+			echo "<br/>";
+			echo "ERRORE: " . var_dump( $fault );
+			echo "<br/>";
+
+		} else {
+
+			$keyValuePairs = $responsedom->getElementsbyTagName( "KeyValuePairOfstringanyType" );
+			echo "D: " . count( $keyValuePairs );
+			foreach ( $keyValuePairs as $keyValuePair ) {
+
+				$key   = $keyValuePair->getElementsbyTagName( "key" )->item( 0 )->textContent;
+				$value = $keyValuePair->getElementsbyTagName( "value" )->item( 0 )->textContent;
+
+				$retval = $value;
+			}
 		}
 
-		return $created_id;
+		return $retval;
+	}
+
+	private function setState( $state, $status, $guid, $logicalName ) {
+
+		$head = EntityUtils::getCRMSoapHeader(self::$organizationServiceURL, self::$securityData);
+		$xml = '<s:Body>
+				<Execute xmlns="http://schemas.microsoft.com/xrm/2011/Contracts/Services">
+				<request i:type="b:SetStateRequest" xmlns:a="http://schemas.microsoft.com/xrm/2011/Contracts" xmlns:b="http://schemas.microsoft.com/crm/2011/Contracts" xmlns:i="http://www.w3.org/2001/XMLSchema-instance">
+               		<a:Parameters xmlns:c="http://schemas.datacontract.org/2004/07/System.Collections.Generic">
+               			<a:KeyValuePairOfstringanyType>
+               				<c:key>EntityMoniker</c:key>
+               				<c:value i:type="a:EntityReference">
+               					<a:Id>' . $guid . '</a:Id>
+               					<a:LogicalName>' . $logicalName . '</a:LogicalName>
+               					<a:Name i:nil="true" />
+               				</c:value>
+               			</a:KeyValuePairOfstringanyType>
+               			<a:KeyValuePairOfstringanyType>
+               				<c:key>State</c:key>
+               				<c:value i:type="a:OptionSetValue">
+               					<a:Value>' . DynamicsIntegrator::$_STATE[ $state ] . '</a:Value>
+               				</c:value>
+               			</a:KeyValuePairOfstringanyType>
+               			<a:KeyValuePairOfstringanyType>
+               				<c:key>Status</c:key>
+               				<c:value i:type="a:OptionSetValue">
+               					<a:Value>' . DynamicsIntegrator::$_STATUS[ $state ] . '</a:Value>
+               				</c:value>
+               			</a:KeyValuePairOfstringanyType>
+               			</a:Parameters>
+						<a:RequestId i:nil="true" />
+               			<a:RequestName>SetState</a:RequestName>
+				</request>
+				</Execute></s:Body>';
+
+		$envelope = $head.$xml."</s:Envelope>";
+
+		$domainname = substr(self::$organizationServiceURL,8,-1);
+		$pos = strpos($domainname, "/");
+		$domainname = substr($domainname,0,$pos);
+		$response = LiveIDManager::GetSOAPResponse("/Organization.svc", $domainname, self::$organizationServiceURL, $envelope);
+
+		return $response;
+	}
+
+	private function emptyObj($obj) {
+		foreach ( $obj as $k ) {
+			return false;
+		}
+		return true;
 	}
 
 	public function updateContact($contact, $guid) {
@@ -466,12 +532,7 @@ class DynamicsIntegrator
             </s:Body>
             </s:Envelope>';
 
-		echo "<pre>";
-		echo $request;
-		echo "</pre>";
-
 		$response =  LiveIDManager::GetSOAPResponse("/Organization.svc", $domainname, self::$organizationServiceURL, $head.$request);
-		error_log("<pre>" . $response . "</pre>");
 
 		$accountsArray = array();
 		if($response!=null && $response!="") {
@@ -522,24 +583,7 @@ class DynamicsIntegrator
 
 		$xmlbuilder = new CrmXmlBuilder( DynamicsIntegrator::$organizationServiceURL, DynamicsIntegrator::$securityData );
 		$envelope = $xmlbuilder->createXml( $entity, $requestName, $guid );
-
 		$response =  LiveIDManager::GetSOAPResponse("/Organization.svc", $domainname, DynamicsIntegrator::$organizationServiceURL, $envelope);
-
-		if ($_DEBUG_MODE) {
-			echo $response;
-			echo "<br/>";
-		}
-
-		$responsedom = new DomDocument();
-		$responsedom->loadXML($response);
-
-		$fault = $responsedom->getElementsbyTagName("fault");
-		echo "ERRORE: " . $fault;
-		if ($fault) {
-			echo "<br/>";
-
-			echo "<br/>";
-		}
 
 		return $response;
 	}
