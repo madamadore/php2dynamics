@@ -50,7 +50,7 @@ class Booking extends Entity {
             $integrator = DynamicsIntegrator::getInstance();
             
             $conditions = array(
-                array( "attribute" => "guid", "operator" => "Equal", "value" => $guid )
+                array( "attribute" => "activityid", "operator" => "Equal", "value" => $guid )
             );
             $booking = new Booking( "emptyobject" );
             $response = $integrator->doRequest( $booking, "RetriveMultiple", "", $conditions );
