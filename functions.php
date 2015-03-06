@@ -86,10 +86,43 @@ function testCreateBooking($integrator) {
 	$booking->regardingobjectid = array( "guid" => "ad4c86fd-f5b8-e411-80d8-c4346bacef70", "logicalName" => "contact" );
 	$booking->tb_totalamount = 40.10;
 	$booking->siteid = array( "guid" => DynamicsIntegrator::$_SITE_ID, "logicalName" => "site" );
-	$booking->serviceid = array( "guid" => DynamicsIntegrator::$_SERVICE_ID, "logicalName" => "service" );
+	$booking->serviceid = array( "guid" => DynamicsIntegrator::$_SERVICE_ID[ "Rental" ], "logicalName" => "service" );
 	$booking->resources = array( array( "guid" => "B6099712-571D-E311-AF02-3C4A92DBD80A", "logicalName" => "equipment" ),
 								 array( "guid" => "F2089712-571D-E311-AF02-3C4A92DBD80A", "logicalName" => "equipment" ) );
+	// $booking_id = $integrator->createBooking( $booking );
 
+	$booking = new Booking("Private Tour Test");
+	$booking->scheduledstart = "2000-03-01 08:00:00";
+	$booking->scheduledend = "2000-03-01 09:00:00";
+	$booking->tb_scheduledbikes = 1;
+	$booking->tb_bookingdate = "2000-01-01 20:02:20";
+	$booking->tb_bookingtype = DynamicsIntegrator::$_BOOKING_TYPE[ "Web" ];
+	$booking->tb_language = array( "value" =>DynamicsIntegrator::$_LANGUAGE[ "DE" ], "type"=>"string" );
+	$booking->tb_servicetype = array( "value" =>DynamicsIntegrator::$_SERVICE_TYPE[ "private_tour" ], "type"=>"string" );
+	$booking->tb_participants = 2;
+	$booking->regardingobjectid = array( "guid" => "ad4c86fd-f5b8-e411-80d8-c4346bacef70", "logicalName" => "contact" );
+	$booking->tb_totalamount = 40.10;
+	$booking->siteid = array( "guid" => DynamicsIntegrator::$_SITE_ID, "logicalName" => "site" );
+	$booking->serviceid = array( "guid" => DynamicsIntegrator::$_SERVICE_ID[ "Tour" ], "logicalName" => "service" );
+	$booking->resources = array( array( "guid" => "B6099712-571D-E311-AF02-3C4A92DBD80A", "logicalName" => "equipment" ) );
+	// $booking_id = $integrator->createBooking( $booking );
+	$booking->Create();
+
+	$booking = new Booking("Scheduled Tour Test");
+	$booking->scheduledstart = "2000-03-01 10:00:00";
+	$booking->scheduledend = "2000-03-01 12:00:00";
+	$booking->tb_scheduledbikes = 1;
+	$booking->tb_bookingdate = "2000-01-01 20:02:20";
+	$booking->tb_bookingtype = array( "value" =>DynamicsIntegrator::$_BOOKING_TYPE[ "Web" ], "type"=>"string" );
+	$booking->tb_language = array( "value" =>DynamicsIntegrator::$_LANGUAGE[ "NL" ], "type"=>"string" );
+	$booking->tb_servicetype = array( "value" =>DynamicsIntegrator::$_SERVICE_TYPE[ "scheduled_tour" ], "type"=>"string" );
+	$booking->tb_participants = 1;
+	$booking->tb_tourid = array( "guid" => "813a65f3-7acf-e211-b5f3-d48564531939", "logicalName" => "appointment" );
+	$booking->regardingobjectid = array( "guid" => "ad4c86fd-f5b8-e411-80d8-c4346bacef70", "logicalName" => "contact" );
+	$booking->tb_totalamount = 40.10;
+	$booking->siteid = array( "guid" => DynamicsIntegrator::$_SITE_ID, "logicalName" => "site" );
+	$booking->serviceid = array( "guid" => DynamicsIntegrator::$_SERVICE_ID[ "Tour" ], "logicalName" => "service" );
+	$booking->resources = array( array( "guid" => "B6099712-571D-E311-AF02-3C4A92DBD80A", "logicalName" => "equipment" ) );
 	$booking_id = $integrator->createBooking( $booking );
 }
 
@@ -156,7 +189,11 @@ function testCheckAvaibility($integrator) {
 function testGetBooking($integrator) {
 	$guid = "B77C3C8B-E9B8-E411-80D6-C4346BAD7228";
 	$rental = $integrator->getBooking( $guid );
-
+        echo "<pre>";
+        var_dump( $rental );
+        echo "</pre>";
+        
+        
 	$guid = "E2142DE0-40BA-E411-80D8-C4346BACEF70";
 	$rental2 = $integrator->getBooking( $guid );
 

@@ -14,7 +14,7 @@ $integrator = DynamicsIntegrator::getInstance();
 // testGetServices($integrator);
 // testGetContacts($integrator);
 testGetBooking($integrator);
-testCreateBooking($integrator);
+// testCreateBooking($integrator);
 // testDeleteContact($integrator);
 // testSecurityData($integrator);
 // testCreateAccount($integrator);

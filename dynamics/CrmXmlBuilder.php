@@ -10,67 +10,63 @@ class CrmXmlBuilder {
 		$this->securityData = $securityData;
 	}
 
-	private function do_entity_array_value($value) {
-
-		list($guid, $logicalName) = $this->do_guid_array( $value );
-
-		$effort = 1;
-		$resourcespecid = "73356AB9-1244-E111-90B4-1CC1DE6D3B23";
-		$ownerid = "adb45933-85fd-4489-917f-3cd1131cb71b";
-
-		$xml = '<b:Entity>
-					<b:Attributes>
-						<b:KeyValuePairOfstringanyType>
-							<c:key>partyid</c:key>
-							<c:value i:type="b:EntityReference">
-								<b:Id>' . $guid . '</b:Id>
-								<b:LogicalName>' . $logicalName . '</b:LogicalName>
-								<b:Name i:nil="true" />
-							</c:value>
-						</b:KeyValuePairOfstringanyType>
-						<b:KeyValuePairOfstringanyType>
-							<c:key>resourcespecid</c:key>
-							<c:value i:type="b:EntityReference">
-								<b:Id>' . $resourcespecid . '</b:Id>
-								<b:LogicalName>resourcespec</b:LogicalName>
-								<b:Name i:nil="true" />
-							</c:value>
-						</b:KeyValuePairOfstringanyType>
-						<b:KeyValuePairOfstringanyType>
-							<c:key>ownerid</c:key>
-							<c:value i:type="b:EntityReference">
-								<b:Id>' . $ownerid . '</b:Id>
-								<b:LogicalName>systemuser</b:LogicalName>
-								<b:Name i:nil="true" />
-							</c:value>
-						</b:KeyValuePairOfstringanyType>
-						<b:KeyValuePairOfstringanyType>
-							<c:key>effort</c:key>
-							<c:value i:type="d:double" xmlns:d="http://www.w3.org/2001/XMLSchema">'.$effort.'</c:value>
-						</b:KeyValuePairOfstringanyType>
-						<b:KeyValuePairOfstringanyType>
-							<c:key>ispartydeleted</c:key>
-							<c:value i:type="d:boolean" xmlns:d="http://www.w3.org/2001/XMLSchema">false</c:value>
-						</b:KeyValuePairOfstringanyType>
-					</b:Attributes>
-		            <b:EntityState i:nil="true" />
-		            <b:FormattedValues />
-		            <b:Id>00000000-0000-0000-0000-000000000000</b:Id>
-		            <b:LogicalName>activityparty</b:LogicalName>
-		            <b:RelatedEntities />
-				</b:Entity>';
-		// <b:Id>F2089712-571D-E311-AF02-3C4A92DBD80A</b:Id>
-		return $xml;
+	private function do_entity_tag($entity) {
+		$xml = '<b:Entity><b:Attributes>';
+		$xml .= $this->fetchEntityFields( $entity );
+		$xml .= '</b:Attributes>
+                        <b:EntityState i:nil="true" />
+                        <b:FormattedValues />
+                        <b:Id>00000000-0000-0000-0000-000000000000</b:Id>
+                        <b:LogicalName>' . $entity->logicalName . '</b:LogicalName>
+                        <b:RelatedEntities />
+                        </b:Entity>';
 	}
 
-	private function do_array_entities_value($key, $arrayOfEntities) {
+	private function do_entity_value($key, $entity) {
+
+		$xml .= '<b:KeyValuePairOfstringanyType>
+					<c:key>' . $key . '</c:key>
+					<c:value i:type="b:Entity">
+						<b:Attributes>';
+		$xml .= $this->fetchEntityFields( $entity );
+		$xml .= '</b:Attributes>
+					<b:EntityState i:nil="true" />
+	                <b:FormattedValues />
+	                <b:Id>' . $entity->guid . '</b:Id>
+					<b:LogicalName>' . $entity->logicalName . '</b:LogicalName>
+	                <b:RelatedEntities />
+				</c:value><b:KeyValuePairOfstringanyType>';
+	}
+
+	private function do_array_entities_value($key, $arrayOfEntities, $defaultLogicalName) {
 
 		$xml = '<b:KeyValuePairOfstringanyType>
-					<c:key>'.$key.'</c:key>
-					<c:value i:type="b:ArrayOfEntity">';
+                            <c:key>'.$key.'</c:key>
+                            <c:value i:type="b:ArrayOfEntity">';
 
 		foreach ($arrayOfEntities as $value) {
-			$xml .= $this->do_entity_array_value( $value );
+
+			list( $guid, $logicalName ) = $this->get_guid_and_logicalName( $value );
+			if (!$logicalName) {
+				$logicalName = $defaultLogicalName;
+			}
+
+			$entity->logicalName = "activityparty";
+			$entity->schema = array(
+				"resourcespecid" => array( "type"=>"guid", "logicalName"=>"resourcespec" ),
+				"partyid" => array( "type"=>"guid", "logicalName"=>$logicalName ),
+				"ownerid" => array( "type"=>"guid", "logicalName"=>"systemuser" ),
+				"effort" => "double",
+				"ispartydeleted" => "boolean",
+			);
+			$entity->partyid = $guid;
+			$entity->resourcespecid = "73356AB9-1244-E111-90B4-1CC1DE6D3B23";
+			$entity->ownerid = "adb45933-85fd-4489-917f-3cd1131cb71b";
+			$entity->effort = 1;
+			$entity->ispartydeleted = "false";
+
+			$xml = $this->do_entity_tag( $entity );
+
 		}
 
 		$xml .= '</c:value>
@@ -78,15 +74,13 @@ class CrmXmlBuilder {
 		return $xml;
 	}
 
-	private function do_guid_array($value) {
+	private function get_guid_and_logicalName($value) {
 		$guid = $value["guid"];
 		$logicalName = $value["logicalName"];
 		return array( $guid, $logicalName );
 	}
 
-	private function do_guid_value($key, $value) {
-
-		list($guid, $logicalName) = $this->do_guid_array( $value );
+	private function do_guid_value($key, $value, $logicalName) {
 
 		$xml = $this->do_entityreference_value( $key, $guid, $logicalName );
 		return $xml;
@@ -142,10 +136,8 @@ class CrmXmlBuilder {
 		return $xml;
 	}
 
-	private function do_option_value($key, $array) {
+	private function do_option_value($key, $value) {
 
-		$value = $array[ "value" ];
-		$type = $array[ "type" ];
 		$xml = '<b:KeyValuePairOfstringanyType>
                     <c:key>' . $key . '</c:key>
                     <c:value i:type="b:OptionSetValue">
@@ -155,14 +147,75 @@ class CrmXmlBuilder {
 		return $xml;
 	}
 
+	private function do_query_value($logicalName, $conditions = array(), $columns = "all") {
+
+		$xml = '<b:KeyValuePairOfstringanyType>
+		            <c:key>Query</c:key>
+					<c:value i:type="b:QueryExpression">';
+
+		$xml .= '<b:ColumnSet>';
+		if ( "all" == $columns ) {
+			$xml .= '<b:AllColumns>true</b:AllColumns>';
+		} else {
+			$xml .= '<b:Columns xmlns:b="http://schemas.microsoft.com/2003/10/Serialization/Arrays">';
+			foreach ( $columns as $column ) {
+				$xml .= '<d:string>' . $column . '</d:string>';
+			}
+			$xml .= '</b:Columns>';
+		}
+		$xml .= '</b:ColumnSet>';
+
+		if ( ! empty( $conditions ) ) {
+			$xml .= '<b:Criteria>
+	                      <b:Filters>
+							<b:FilterExpression>
+				            <b:Conditions>';
+			foreach ( $conditions as $condition ) {
+				$xml .= '<b:ConditionExpression>
+			            <b:AttributeName>' . $condition[ "attribute" ] . '</b:AttributeName>
+			            <b:Operator>' . $condition[ "operator" ] . '</b:Operator>
+			            <b:Values xmlns:b="http://schemas.microsoft.com/2003/10/Serialization/Arrays">
+			                <c:anyType i:type="d:string" xmlns:d="http://www.w3.org/2001/XMLSchema">' . $condition[ "value" ] . '</c:anyType>
+			            </b:Values>
+						</b:ConditionExpression>';
+			}
+
+			$xml .= '</b:Conditions>
+				            </b:FilterExpression>
+						</b:Filters>
+					</b:Criteria>';
+		}
+
+		$xml .= '<b:Distinct>false</b:Distinct>
+				<b:EntityName>' . $logicalName . '</b:EntityName>
+				<b:LinkEntities/>
+				<b:Orders />
+				<b:PageInfo>
+					<b:Count>0</b:Count>
+					<b:PageNumber>0</b:PageNumber>
+	                <b:PagingCookie i:nil="true" />
+	                <b:ReturnTotalRecordCount>false</b:ReturnTotalRecordCount>
+                </b:PageInfo>
+				<b:NoLock>false</b:NoLock>';
+
+		$xml .= '</c:value>
+		        </b:KeyValuePairOfstringanyType>';
+		return $xml;
+	}
+
 	private function getRequestHeaders() {
 		$head = EntityUtils::getCRMSoapHeader($this->organizationServiceURL, $this->securityData);
 		return $head;
 	}
 
-	private function getHeadBody($requestName = "Create") {
+	private function getExecuteHead($requestName = "Create") {
+		$xml = '<s:Body>
+				<Execute xmlns="http://schemas.microsoft.com/xrm/2011/Contracts/Services">';
+		return $xml;
+	}
 
-		$key .= '<c:key>Target</c:key>';
+	private function getRequestHead($requestName = "Create") {
+
 		switch ($requestName) {
 			case "Create":
 				$request = "CreateRequest";
@@ -175,78 +228,51 @@ class CrmXmlBuilder {
 				break;
 			case "RetriveMultiple":
 				$request = "RetriveMultipleRequest";
-				$key .= '<c:key>Query</c:key>';
 				break;
 			case "Retrive":
 				$request = "RetriveRequest";
-				$key .= '<c:key>Query</c:key>';
+				break;
+			case "SetState":
+				$request = "SetStateRequest";
 				break;
 		}
 
-
-		$xml = '<s:Body>
-				<Execute xmlns="http://schemas.microsoft.com/xrm/2011/Contracts/Services">
-				<request i:type="b:' . $request . '" xmlns:b="http://schemas.microsoft.com/xrm/2011/Contracts" xmlns:i="http://www.w3.org/2001/XMLSchema-instance">
-		      	<b:Parameters xmlns:c="http://schemas.datacontract.org/2004/07/System.Collections.Generic">
-		        <b:KeyValuePairOfstringanyType>' . $key;
+		$xml = '<request i:type="b:' . $request . '" xmlns:b="http://schemas.microsoft.com/xrm/2011/Contracts" xmlns:i="http://www.w3.org/2001/XMLSchema-instance">
+		      	<b:Parameters xmlns:c="http://schemas.datacontract.org/2004/07/System.Collections.Generic">';
 
 		return $xml;
 	}
 
-
-	private function getHeadRequestBody($requestName = "Create") {
-		switch ($requestName) {
-			case "Update":
-			case "Create":
-				$xml .= '<c:value i:type="b:Entity">
-		              		<b:Attributes>';
-				break;
-			case "Delete":
-				$xml .= '<c:value i:type="b:EntityReference">';
-				break;
-		}
-
-		return $xml;
-	}
-
-	private function getTailRequestBody($entityLogicalName, $requestName = "Create", $guid = "00000000-0000-0000-0000-000000000000") {
-		switch ($requestName) {
-			case "Update":
-			case "Create":
-				$xml .= '</b:Attributes>
-							<b:EntityState i:nil="true" />
-		            		<b:FormattedValues />
-		            		<b:Id>' . $guid . '</b:Id>
-		            		<b:LogicalName>' . $entityLogicalName . '</b:LogicalName>
-		                    <b:RelatedEntities />
-		                </c:value>';
-				break;
-			case "Delete":
-				$xml .= '</c:value>';
-				break;
-		}
-
-		return $xml;
-	}
-
-	private function getTailBody($entityLogicalName, $requestName = "Create") {
-
-		$xml = '</b:KeyValuePairOfstringanyType>
-		      	</b:Parameters>
+	private function getRequestTail($requestName = "Create") {
+		$xml = '</b:Parameters>
 		      	<b:RequestId i:nil="true" />
 		      	<b:RequestName>' . $requestName . '</b:RequestName>
-				</request>
-				</Execute>
-				</s:Body></s:Envelope>';
+		      	</request>';
+		return $xml;
+	}
+
+	private function getExecuteTail($requestName = "Create") {
+		$xml = '</Execute></s:Body>';
 		return $xml;
 	}
 
 	private function fetchEntityFields($entity) {
+
 		$schema = $entity->schema;
-		foreach ( $schema as $key=>$type ) {
+		foreach ( $schema as $key=>$typeOrArray ) {
+
+			if ( is_array( $typeOrArray ) )  {
+				$type = $typeOrArray[ "type" ];
+				if ( isset( $typeOrArray[ "defaultLogicalName" ] ) ) $defaultLogicalName = $typeOrArray[ "defaultLogicalName" ];
+				if ( isset( $typeOrArray[ "logicalName" ] ) ) $logicalName = $typeOrArray[ "logicalName" ];
+			} else {
+				$type = $typeOrArray;
+			}
 
 			$value = $entity->{$key};
+
 			if ( false != $value ) {
+
 				switch ( $type ) {
 
 					case "datetime":
@@ -256,10 +282,10 @@ class CrmXmlBuilder {
 						$xml .= $this->do_generic_value( $key, $value, "double" );
 						break;
 					case "guid":
-						$xml .= $this->do_guid_value( $key, $value );
+						$xml .= $this->do_guid_value( $key, $value, $logicalName );
 						break;
 					case "guid_array":
-						$xml .= $this->do_array_entities_value($key, $value );
+						$xml .= $this->do_array_entities_value($key, $value, $defaultLogicalName );
 						break;
 					case "int":
 						$xml .= $this->do_generic_value( $key, $value, "int" );
@@ -281,37 +307,46 @@ class CrmXmlBuilder {
 		return $xml;
 	}
 
-	private function getEntityBody($entity, $requestName = "Create", $guid = "00000000-0000-0000-0000-000000000000") {
+	private function getRequestBody($entity, $requestName = "Create", $guid = "00000000-0000-0000-0000-000000000000", $conditions = array(), $columns = "all") {
+
+		$xml = $this->getExecuteHead( $requestName );
+		$xml .= $this->getRequestHead( $requestName );
 
 		switch ($requestName) {
-			case "Update":
-			case "Create":
-				$xml = $this->fetchEntityFields( $entity );
+			case "Retrive":
+			case "RetriveMutliple":
+				$xml .= $this->do_query_value($entity->logicalName, $conditions, $columns);
+				break;
+			case "SetState":
+				$xml .= $this->do_entityreference_value( 'EntityMoniker', $guid, $entity->logicalName );
+				$xml .= $this->do_option_value( 'State', $entity->state, $entity->logicalName );
+				$xml .= $this->do_option_value( 'Status', $entity->status, $entity->logicalName );
 				break;
 			case "Delete":
-				//TODO: rifare: $xml = $this->do_entityreference_content( $guid, $entity->logicalName );
+				$xml .= $this->do_entityreference_value( 'Target', $guid, $entity->logicalName );
 				break;
+			case "Update":
+			case "Create":
+				$xml .= $this->do_entity_value( 'Target', $entity );
 		}
 
-		return $xml;
+		$xml .= $this->getRequestTail( $requestName );
+		$xml .= $this->getExecuteTail( $requestName );
 
+		return $xml;
 	}
 
 	/**
-	 * @param $requestName  Create, Update, Delete, Retrive, RetiveMultiple
+	 * @param $requestName  Create, Update, Delete, Retrive, RetriveMultiple
 	 */
-	public function createXml($entity, $requestName = "Create", $guid = "00000000-0000-0000-0000-000000000000") {
+	public function createXml($entity, $requestName = "Create", $guid = "00000000-0000-0000-0000-000000000000", $conditions = array(), $columns = "all") {
 
 		global $_DEBUG_MODE;
 
 		$head = $this->getRequestHeaders();
-		$body = $this->getHeadBody( $requestName );
-		$body .= $this->getHeadRequestBody( $requestName );
-		$body .= $this->getEntityBody( $entity, $requestName, $guid );
-		$body .= $this->getTailRequestBody( $entity->logicalName, $requestName, $guid );
-		$body .= $this->getTailBody( $entity->logicalName, $requestName );
+		$body = $this->getRequestBody( $entity, $requestName, $guid, $conditions, $columns );
 
-		$envelope = $head.$body;
+		$envelope = $head.$body."</s:Envelope>";
 
 		if ($_DEBUG_MODE) {
 			echo "<pre>";

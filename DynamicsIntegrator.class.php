@@ -43,7 +43,7 @@ class DynamicsIntegrator
 	public static $_SERVICE_TYPE = array( "scheduled_tour" => "108600000", "private_tour" => "108600001", "bike_rental" => "108600002" );
 	public static $_BIKE_PRODUCT_ID = "11447825-AE42-E111-90B4-1CC1DE6D3B23";
 	public static $_SITE_ID = "D68CDA78-D10E-E111-926A-1CC1DE086845";
-	public static $_SERVICE_ID = "74356ab9-1244-e111-90b4-1cc1de6d3b23"; //"1D3E19B5-EFDA-E111-B52D-D4856451DC79";
+	public static $_SERVICE_ID = array( "Rental" => "74356ab9-1244-e111-90b4-1cc1de6d3b23", "Tour" => "1D3E19B5-EFDA-E111-B52D-D4856451DC79" );
 
 	public static $_BOOKING_TYPE = array( "Web" => "108600000", "Direct" => "108600003", "Partner" => "108600001",
 	                                      "Third Party" => "108600002", "Local Party" => "108600004");
@@ -85,6 +85,11 @@ class DynamicsIntegrator
 	public function createBooking($booking, $state="Scheduled", $status = "Confirmed") {
 
 		$response = $this->doRequest( $booking );
+
+		echo "----";
+		echo $response;
+		echo "----";
+
 		$guid = $this->getCreatedId( $response );
 		$this->setState( $state, $status, $guid, 'serviceappointment' );
 
@@ -99,14 +104,11 @@ class DynamicsIntegrator
 
 		if ( count( (array) $fault) > 0 ) {
 
-			echo "<br/>";
-			echo "ERRORE: " . var_dump( $fault );
-			echo "<br/>";
+			return false;
 
 		} else {
 
 			$keyValuePairs = $responsedom->getElementsbyTagName( "KeyValuePairOfstringanyType" );
-			echo "D: " . count( $keyValuePairs );
 			foreach ( $keyValuePairs as $keyValuePair ) {
 
 				$key   = $keyValuePair->getElementsbyTagName( "key" )->item( 0 )->textContent;
@@ -143,7 +145,7 @@ class DynamicsIntegrator
                			<a:KeyValuePairOfstringanyType>
                				<c:key>Status</c:key>
                				<c:value i:type="a:OptionSetValue">
-               					<a:Value>' . DynamicsIntegrator::$_STATUS[ $state ] . '</a:Value>
+               					<a:Value>' . DynamicsIntegrator::$_STATUS[ $status ] . '</a:Value>
                				</c:value>
                			</a:KeyValuePairOfstringanyType>
                			</a:Parameters>
@@ -375,92 +377,29 @@ class DynamicsIntegrator
 
 	public function getBooking($guid) {
 
-		global $_DEBUG_MODE;
+            $booking = new Booking( "emptyobject" );
+            $response = $this->doRequest( $booking, "Retrive", $guid );
 
-		$domainname = substr(self::$organizationServiceURL,8,-1);
-		$pos = strpos($domainname, "/");
-		$domainname = substr($domainname,0,$pos);
-
-		$head = EntityUtils::getCRMSoapHeader(self::$organizationServiceURL, self::$securityData);
-
-		$request = '<s:Body>
-						<Execute xmlns="http://schemas.microsoft.com/xrm/2011/Contracts/Services" xmlns:i="http://www.w3.org/2001/XMLSchema-instance">
-					      <request i:type="a:RetrieveMultipleRequest" xmlns:a="http://schemas.microsoft.com/xrm/2011/Contracts">
-					        <a:Parameters xmlns:b="http://schemas.datacontract.org/2004/07/System.Collections.Generic">
-					          <a:KeyValuePairOfstringanyType>
-					            <b:key>Query</b:key>
-					            <b:value i:type="a:QueryExpression">
-					              <a:ColumnSet>
-					                <a:AllColumns>true</a:AllColumns>
-					              </a:ColumnSet>
-
-									<a:Criteria>
-				                      <a:Filters>
-				                        <a:FilterExpression>
-				                          <a:Conditions>
-				                            <a:ConditionExpression>
-				                              <a:AttributeName>activityid</a:AttributeName>
-				                              <a:Operator>Equal</a:Operator>
-				                              <a:Values xmlns:b="http://schemas.microsoft.com/2003/10/Serialization/Arrays">
-				                                <b:anyType i:type="c:string" xmlns:c="http://www.w3.org/2001/XMLSchema">' . $guid . '</b:anyType>
-				                              </a:Values>
-				                            </a:ConditionExpression>
-				                          </a:Conditions>
-				                        </a:FilterExpression>
-				                      </a:Filters>
-				                    </a:Criteria>
-
-					              <a:Distinct>false</a:Distinct>
-					              <a:EntityName>serviceappointment</a:EntityName>
-					              <a:LinkEntities/>
-					              <a:Orders />
-					              <a:PageInfo>
-					                <a:Count>0</a:Count>
-					                <a:PageNumber>0</a:PageNumber>
-					                <a:PagingCookie i:nil="true" />
-					                <a:ReturnTotalRecordCount>false</a:ReturnTotalRecordCount>
-					              </a:PageInfo>
-					              <a:NoLock>false</a:NoLock>
-					            </b:value>
-					          </a:KeyValuePairOfstringanyType>
-					        </a:Parameters>
-					        <a:RequestId i:nil="true" />
-					        <a:RequestName>RetrieveMultiple</a:RequestName>
-					      </request>
-					    </Execute>
-					</s:Body></s:Envelope>';
-
-		$response = LiveIDManager::GetSOAPResponse("/Organization.svc", $domainname, self::$organizationServiceURL, $head.$request);
-
-		if ($_DEBUG_MODE) {
-			echo "<pre>";
-			echo var_dump($response);
-			echo "</pre>";
-			echo "<br/>";
-		}
-
-		$accountsArray = array();
-		if($response != null && $response !="") {
-
-			$responsedom = new DomDocument();
-			$responsedom->loadXML($response);
-			$entities = $responsedom->getElementsbyTagName("Entity");
-			foreach($entities as $entity) {
-				$reservation = array();
-				$kvptypes = $entity->getElementsbyTagName("KeyValuePairOfstringanyType");
-				echo "<br><br>NUOVA ENTITY:<br><br>";
-				foreach($kvptypes as $kvp) {
-					$key =  $kvp->getElementsbyTagName("key")->item(0)->textContent;
-					$value =  $kvp->getElementsbyTagName("value")->item(0)->textContent;
-					echo "key=".$key." value=".$value."<br/>";
-				}
-//                        $accountsArray[] = $reservation;
-			}
-		} else {
-			return false;
-		}
-		return $accountsArray;
-
+            $responsedom = new DomDocument();
+            $responsedom->loadXML($response);
+            
+            $arrayOfObjects = array();
+            $entities = $responsedom->getElementsbyTagName("Entity");
+            foreach ($entities as $entity ) {
+                
+                $object = new stdClass();
+                $nodes = $entity->getElementsbyTagName("keyvaluepairofstringanytype");
+                
+                foreach( $nodes as $node ) {
+                    $key =  $node->getElementsbyTagName("key")->item(0)->textContent;
+                    $value =  $node->getElementsbyTagName("value")->item(0)->textContent;
+                    $object->{$key} = $value;
+                }
+                
+                $arrayOfObjects[] = $object;
+            }
+            
+            return $arrayOfObjects;
 	}
 
 	private function validateDate($date) {
@@ -573,19 +512,19 @@ class DynamicsIntegrator
 		return $accountsArray;
 	}
 
-	private function doRequest($entity, $requestName = "Create", $guid = "00000000-0000-0000-0000-000000000000") {
+	private function doRequest($entity, $requestName = "Create", $guid = "00000000-0000-0000-0000-000000000000", $conditions = array(), $columns = "all") {
 
-		global $_DEBUG_MODE;
+            global $_DEBUG_MODE;
 
-		$domainname = substr( DynamicsIntegrator::$organizationServiceURL,8,-1 );
-		$pos = strpos($domainname, "/");
-		$domainname = substr($domainname,0,$pos);
+            $domainname = substr( DynamicsIntegrator::$organizationServiceURL,8,-1 );
+            $pos = strpos($domainname, "/");
+            $domainname = substr($domainname,0,$pos);
 
-		$xmlbuilder = new CrmXmlBuilder( DynamicsIntegrator::$organizationServiceURL, DynamicsIntegrator::$securityData );
-		$envelope = $xmlbuilder->createXml( $entity, $requestName, $guid );
-		$response =  LiveIDManager::GetSOAPResponse("/Organization.svc", $domainname, DynamicsIntegrator::$organizationServiceURL, $envelope);
+            $xmlbuilder = new CrmXmlBuilder( DynamicsIntegrator::$organizationServiceURL, DynamicsIntegrator::$securityData );
+            $envelope = $xmlbuilder->createXml( $entity, $requestName, $guid, $conditions, $columns );
+            $response =  LiveIDManager::GetSOAPResponse("/Organization.svc", $domainname, DynamicsIntegrator::$organizationServiceURL, $envelope);
 
-		return $response;
+            return $response;
 	}
 
 	public function deleteBooking() {}

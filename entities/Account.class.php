@@ -11,4 +11,10 @@ class Account extends Entity {
 		$this->name = $name;
 	}
 
+        public function Create() {}
+        public function Update() {}
+
+        public static function RetriveMultiple($conditions = array(), $columns = "all") {}
+        public static function Retrive($guid) {}
+        public static function Delete($guid) {}
 }
