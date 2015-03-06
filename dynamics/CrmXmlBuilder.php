@@ -314,7 +314,7 @@ class CrmXmlBuilder {
 
 		switch ($requestName) {
 			case "Retrive":
-			case "RetriveMutliple":
+			case "RetriveMultiple":
 				$xml .= $this->do_query_value($entity->logicalName, $conditions, $columns);
 				break;
 			case "SetState":

@@ -187,16 +187,19 @@ function testCheckAvaibility($integrator) {
 }
 
 function testGetBooking($integrator) {
-	$guid = "B77C3C8B-E9B8-E411-80D6-C4346BAD7228";
-	$rental = $integrator->getBooking( $guid );
-        echo "<pre>";
-        var_dump( $rental );
-        echo "</pre>";
+    
+    $guid = "B77C3C8B-E9B8-E411-80D6-C4346BAD7228";
+    $booking = Booking::Retrive($guid);
+	
+    echo "<pre>";
+    var_dump( $booking );
+    echo "</pre>";
         
-        
+    /*
 	$guid = "E2142DE0-40BA-E411-80D8-C4346BACEF70";
 	$rental2 = $integrator->getBooking( $guid );
 
 	$guid = "4BFEA247-40BA-E411-80D8-FC15B4280CB8";
 	$rental3 = $integrator->getBooking( $guid );
+     * */
 }

@@ -378,7 +378,7 @@ class DynamicsIntegrator
 	public function getBooking($guid) {
 
             $booking = new Booking( "emptyobject" );
-            $response = $this->doRequest( $booking, "Retrive", $guid );
+            $response = $this->doRequest( $booking, "RetriveMultiple", $guid );
 
             $responsedom = new DomDocument();
             $responsedom->loadXML($response);
@@ -512,7 +512,7 @@ class DynamicsIntegrator
 		return $accountsArray;
 	}
 
-	private function doRequest($entity, $requestName = "Create", $guid = "00000000-0000-0000-0000-000000000000", $conditions = array(), $columns = "all") {
+	public function doRequest($entity, $requestName = "Create", $guid = "00000000-0000-0000-0000-000000000000", $conditions = array(), $columns = "all") {
 
             global $_DEBUG_MODE;
 
@@ -524,13 +524,11 @@ class DynamicsIntegrator
             $envelope = $xmlbuilder->createXml( $entity, $requestName, $guid, $conditions, $columns );
             $response =  LiveIDManager::GetSOAPResponse("/Organization.svc", $domainname, DynamicsIntegrator::$organizationServiceURL, $envelope);
 
+            if ( $_DEBUG_MODE ) {
+                var_dump( $reponse ); 
+            }
+            
             return $response;
 	}
-
-	public function deleteBooking() {}
-
-	public function getTour($guid) {}
-
-	public function getContact($guid) {}
 
 }
