@@ -168,22 +168,23 @@ class CrmXmlBuilder {
 		if ( ! empty( $conditions ) ) {
 			$xml .= '<b:Criteria>
 	                      <b:Filters>
-							<b:FilterExpression>
-				            <b:Conditions>';
+                                <b:FilterExpression>
+                                    <b:Conditions>';
+                        
 			foreach ( $conditions as $condition ) {
 				$xml .= '<b:ConditionExpression>
 			            <b:AttributeName>' . $condition[ "attribute" ] . '</b:AttributeName>
 			            <b:Operator>' . $condition[ "operator" ] . '</b:Operator>
-			            <b:Values xmlns:b="http://schemas.microsoft.com/2003/10/Serialization/Arrays">
+			            <b:Values xmlns:c="http://schemas.microsoft.com/2003/10/Serialization/Arrays">
 			                <c:anyType i:type="d:string" xmlns:d="http://www.w3.org/2001/XMLSchema">' . $condition[ "value" ] . '</c:anyType>
 			            </b:Values>
-						</b:ConditionExpression>';
+                                    </b:ConditionExpression>';
 			}
 
 			$xml .= '</b:Conditions>
-				            </b:FilterExpression>
-						</b:Filters>
-					</b:Criteria>';
+                                </b:FilterExpression>
+                                </b:Filters>
+                                </b:Criteria>';
 		}
 
 		$xml .= '<b:Distinct>false</b:Distinct>
@@ -226,11 +227,11 @@ class CrmXmlBuilder {
 			case "Delete":
 				$request = "DeleteRequest";
 				break;
-			case "RetriveMultiple":
-				$request = "RetriveMultipleRequest";
+			case "RetrieveMultiple":
+				$request = "RetrieveMultipleRequest";
 				break;
-			case "Retrive":
-				$request = "RetriveRequest";
+			case "Retrieve":
+				$request = "RetrieveRequest";
 				break;
 			case "SetState":
 				$request = "SetStateRequest";
@@ -313,8 +314,8 @@ class CrmXmlBuilder {
 		$xml .= $this->getRequestHead( $requestName );
 
 		switch ($requestName) {
-			case "Retrive":
-			case "RetriveMultiple":
+			case "Retrieve":
+			case "RetrieveMultiple":
 				$xml .= $this->do_query_value($entity->logicalName, $conditions, $columns);
 				break;
 			case "SetState":
@@ -348,14 +349,8 @@ class CrmXmlBuilder {
 
 		$envelope = $head.$body."</s:Envelope>";
 
-		if ($_DEBUG_MODE) {
-			echo "<pre>";
-			echo $envelope;
-			echo "</pre>";
-			echo "<br/>";
-		}
-
 		return $envelope;
 
 	}
+
 }

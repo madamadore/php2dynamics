@@ -186,20 +186,30 @@ function testCheckAvaibility($integrator) {
 	echo "</pre>";
 }
 
-function testGetBooking($integrator) {
+function testGetBooking() {
     
-    $guid = "B77C3C8B-E9B8-E411-80D6-C4346BAD7228";
-    $booking = Booking::Retrive($guid);
-	
-    echo "<pre>";
-    var_dump( $booking );
-    echo "</pre>";
-        
-    /*
-	$guid = "E2142DE0-40BA-E411-80D8-C4346BACEF70";
-	$rental2 = $integrator->getBooking( $guid );
+    global $_DEBUG_MODE;
+    
+    testBooking( "B77C3C8B-E9B8-E411-80D6-C4346BAD7228" );
+    testBooking( "E2142DE0-40BA-E411-80D8-C4346BACEF70" );
+    testBooking( "4BFEA247-40BA-E411-80D8-FC15B4280CB8" );
+     
+}
 
-	$guid = "4BFEA247-40BA-E411-80D8-FC15B4280CB8";
-	$rental3 = $integrator->getBooking( $guid );
-     * */
+function testBooking($guid) {
+    
+    $arrayOfBooking = Booking::Retrive($guid);
+
+    echo "<h3>Booking ID:</h3>" . $guid . "<br />";
+    
+    if ( $arrayOfBooking ) {
+            
+        echo "<pre>";
+        foreach ( $arrayOfBooking as $booking ) {
+            var_dump( $booking );
+        }
+        echo "</pre>";
+        
+    }
+    
 }

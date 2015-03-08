@@ -43,31 +43,41 @@ class Booking extends Entity {
         public function Create() {}
         public function Update() {}
 
-        public static function RetriveMultiple($conditions = array(), $columns = "all") {}
+        public static function RetriveMultiple($conditions = array(), $columns = "all") {
+            return self::RetriveBooking( false, $conditions, $columns );
+        }
         
         public static function Retrive($guid) {
+            return self::RetriveBooking( $guid );
+        }
+        
+        private static function RetriveBooking($guid = false, $conditions = array(), $columns = "all") {
             
             $integrator = DynamicsIntegrator::getInstance();
             
-            $conditions = array(
-                array( "attribute" => "activityid", "operator" => "Equal", "value" => $guid )
-            );
+            if ( $guid ) {
+                $conditions = array(
+                    array( "attribute" => "activityid", "operator" => "Equal", "value" => $guid )
+                );
+            }
             $booking = new Booking( "emptyobject" );
-            $response = $integrator->doRequest( $booking, "RetriveMultiple", "", $conditions );
-
+            $response = $integrator->doRequest( $booking, "RetrieveMultiple", $guid, $conditions, $columns );
+                
             $responsedom = new DomDocument();
             $responsedom->loadXML( $response );
             
             $arrayOfObjects = array();
             $entities = $responsedom->getElementsbyTagName( "Entity" );
-            foreach ($entities as $entity ) {
+            foreach ( $entities as $entity ) {
                 
                 $object = new stdClass();
-                $nodes = $entity->getElementsbyTagName( "keyvaluepairofstringanytype" );
+                $nodes = $entity->getElementsbyTagName( "KeyValuePairOfstringanyType" );
                 
                 foreach( $nodes as $node ) {
                     $key =  $node->getElementsbyTagName( "key" )->item(0)->textContent;
                     $value =  $node->getElementsbyTagName( "value" )->item(0)->textContent;
+                    $type = $node->getElementsbyTagName( "value" )->item(0)->getAttribute( 'type' );
+                    
                     $object->{$key} = $value;
                 }
                 

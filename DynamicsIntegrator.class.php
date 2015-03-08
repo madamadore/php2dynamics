@@ -522,13 +522,24 @@ class DynamicsIntegrator
 
             $xmlbuilder = new CrmXmlBuilder( DynamicsIntegrator::$organizationServiceURL, DynamicsIntegrator::$securityData );
             $envelope = $xmlbuilder->createXml( $entity, $requestName, $guid, $conditions, $columns );
+            
+            if ($_DEBUG_MODE) {
+                $this->displayXml( $envelope );
+            }
+                
             $response =  LiveIDManager::GetSOAPResponse("/Organization.svc", $domainname, DynamicsIntegrator::$organizationServiceURL, $envelope);
 
             if ( $_DEBUG_MODE ) {
-                var_dump( $reponse ); 
+                $this->displayXml( $response );
             }
             
             return $response;
 	}
+        
+        private function displayXml($xml) {
+            echo "<pre>";
+            echo $xml; 
+            echo "</pre><br />";
+        }
 
 }
