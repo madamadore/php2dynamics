@@ -25,9 +25,29 @@ class Contact extends Entity {
 
         public function Create() {}
         public function Update() {}
+        
+        public static function getInstance() {
+            return new Contact( "emptyobject" );
+        }
+        
+        public static function RetrieveMultiple($conditions = array(), $columns = "all") {
+            return self::RetriveSingle( false, $conditions, $columns );
+        }
 
-        public static function RetriveMultiple($conditions = array(), $columns = "all") {}
-        public static function Retrive($guid) {}
+        public static function Retrieve($guid) {
+            return self::RetriveSingle( $guid );
+        }
+
+        protected static function RetriveSingle($guid = false, $conditions = array(), $columns = "all") {
+            list( $integrator, $conditions ) = self::instanceIntegrator( $guid, $conditions );
+
+            $object = self::getInstance();
+            $response = $integrator->doRequest( $object, "RetrieveMultiple", $guid, $conditions, $columns );
+            $entities = self::filterResponse($response);
+
+            return $entities;
+        }
+
         public static function Delete($guid) {}
         
 }

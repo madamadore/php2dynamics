@@ -1,6 +1,6 @@
 <?php
 
-abstract class Entity {
+abstract class Entity extends ReadOnlyEntity {
 
 	var $guid = "00000000-0000-0000-0000-000000000000";
 	var $logicalName;
@@ -11,8 +11,6 @@ abstract class Entity {
 	public abstract function Create();
 	public abstract function Update();
 
-	public static abstract function RetriveMultiple($conditions = array(), $columns = "all");
-	public static abstract function Retrive($guid);
 	public static abstract function Delete($guid);
 
 }

@@ -42,49 +42,37 @@ class Booking extends Entity {
         
         public function Create() {}
         public function Update() {}
+        
+        public static function getInstance() {
+            return new Booking( "emptyobject" );
+        }
+        
+        public static function RetrieveMultiple($conditions = array(), $columns = "all") {
+            return self::RetriveSingle( false, $conditions, $columns );
+        }
 
-        public static function RetriveMultiple($conditions = array(), $columns = "all") {
-            return self::RetriveBooking( false, $conditions, $columns );
+        public static function Retrieve($guid) {
+            return self::RetriveSingle( $guid );
         }
-        
-        public static function Retrive($guid) {
-            return self::RetriveBooking( $guid );
+
+        protected static function RetriveSingle($guid = false, $conditions = array(), $columns = "all") {
+            list( $integrator, $conditions ) = self::instanceIntegrator( $guid, $conditions );
+
+            $object = self::getInstance();
+            $response = $integrator->doRequest( $object, "RetrieveMultiple", $guid, $conditions, $columns );
+            $entities = self::filterResponse($response);
+
+            return $entities;
         }
-        
-        private static function RetriveBooking($guid = false, $conditions = array(), $columns = "all") {
-            
-            $integrator = DynamicsIntegrator::getInstance();
-            
-            if ( $guid ) {
-                $conditions = array(
-                    array( "attribute" => "activityid", "operator" => "Equal", "value" => $guid )
-                );
-            }
-            $booking = new Booking( "emptyobject" );
-            $response = $integrator->doRequest( $booking, "RetrieveMultiple", $guid, $conditions, $columns );
-                
-            $responsedom = new DomDocument();
-            $responsedom->loadXML( $response );
-            
-            $arrayOfObjects = array();
-            $entities = $responsedom->getElementsbyTagName( "Entity" );
-            foreach ( $entities as $entity ) {
-                
-                $object = new stdClass();
-                $nodes = $entity->getElementsbyTagName( "KeyValuePairOfstringanyType" );
-                
-                foreach( $nodes as $node ) {
-                    $key =  $node->getElementsbyTagName( "key" )->item(0)->textContent;
-                    $value =  $node->getElementsbyTagName( "value" )->item(0)->textContent;
-                    $type = $node->getElementsbyTagName( "value" )->item(0)->getAttribute( 'type' );
-                    
-                    $object->{$key} = $value;
+    
+        protected static function filterResults($entities) {
+            $bookings = array();
+            foreach ($entities as $entity) {
+                if ( property_exists( $entity, "subject" ) ) {
+                    $bookings[] = $entity;
                 }
-                
-                $arrayOfObjects[] = $object;
             }
-            
-            return $arrayOfObjects;
+            return $bookings;
         }
         
         public static function Delete($guid) {}
