@@ -2,9 +2,17 @@
 
 class Equipment extends ReadOnlyEntity {
     
-    public static function getInstance() {
-        return new Equipment();
-    }
+    var $logicalName = "equipment";
+    var $schema = array(
+        "tb_id" => "string",
+        "description" => "string",
+        "equipmentid" => "string",
+        "name" => "string",
+        "siteid" => array ( "type"=>"guid", "logicalName"=>"site" ),
+        "tb_productid" => array ( "type"=>"guid", "logicalName"=>"product" ),
+        "tb_type" => "option",
+        "tb_primarylanguage" => "option",
+    );
     
     public static function RetrieveMultiple($conditions = array(), $columns = "all") {
         return self::RetriveSingle( false, $conditions, $columns );
@@ -15,11 +23,11 @@ class Equipment extends ReadOnlyEntity {
     }
     
     protected static function RetriveSingle($guid = false, $conditions = array(), $columns = "all") {
-        list( $integrator, $conditions ) = self::instanceIntegrator( $guid, $conditions );
+        list( $integrator, $conditions ) = self::instanceIntegrator( $guid, $conditions, "equipmentid" );
         
-        $object = self::getInstance();
+        $object = new Equipment();
         $response = $integrator->doRequest( $object, "RetrieveMultiple", $guid, $conditions, $columns );
-        $entities = self::filterResponse($response);
+        $entities = self::filterResponse( $response, $object->schema );
 
         return $entities;
     }

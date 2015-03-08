@@ -56,16 +56,20 @@ class Booking extends Entity {
         }
 
         protected static function RetriveSingle($guid = false, $conditions = array(), $columns = "all") {
-            list( $integrator, $conditions ) = self::instanceIntegrator( $guid, $conditions );
+            list( $integrator, $conditions ) = self::instanceIntegrator( $guid, $conditions, "activityid" );
 
-            $object = self::getInstance();
+            $object = new Booking( "emptyobject" );
             $response = $integrator->doRequest( $object, "RetrieveMultiple", $guid, $conditions, $columns );
-            $entities = self::filterResponse($response);
+            $entities = self::filterResponse($response, $object->schema);
 
             return $entities;
         }
     
-        protected static function filterResults($entities) {
+        protected static function filterResponse($response, $schema) {
+            
+            $xmlReader = new CrmXmlReader(false);
+            $entities = $xmlReader->getEntities( $response, $schema );
+        
             $bookings = array();
             foreach ($entities as $entity) {
                 if ( property_exists( $entity, "subject" ) ) {
