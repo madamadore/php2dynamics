@@ -8,9 +8,4 @@ abstract class Entity extends ReadOnlyEntity {
 	var $status;
 	var $schema;
 
-	public abstract function Create();
-	public abstract function Update();
-
-	public static abstract function Delete($guid);
-
 }
