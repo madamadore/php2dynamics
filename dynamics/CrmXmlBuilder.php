@@ -146,7 +146,7 @@ class CrmXmlBuilder {
                 </b:KeyValuePairOfstringanyType>';
 		return $xml;
 	}
-
+        
 	private function do_query_value($logicalName, $conditions = array(), $columns = "all") {
 
 		$xml = '<b:KeyValuePairOfstringanyType>
@@ -155,13 +155,13 @@ class CrmXmlBuilder {
 
 		$xml .= '<b:ColumnSet>';
 		if ( "all" == $columns ) {
-			$xml .= '<b:AllColumns>true</b:AllColumns>';
+                    $xml .= '<b:AllColumns>true</b:AllColumns>';
 		} else {
-			$xml .= '<b:Columns xmlns:b="http://schemas.microsoft.com/2003/10/Serialization/Arrays">';
-			foreach ( $columns as $column ) {
-				$xml .= '<d:string>' . $column . '</d:string>';
-			}
-			$xml .= '</b:Columns>';
+                    $xml .= '<b:Columns xmlns:b="http://schemas.microsoft.com/2003/10/Serialization/Arrays">';
+                    foreach ( $columns as $column ) {
+                            $xml .= '<d:string>' . $column . '</d:string>';
+                    }
+                    $xml .= '</b:Columns>';
 		}
 		$xml .= '</b:ColumnSet>';
 
@@ -256,53 +256,70 @@ class CrmXmlBuilder {
 		$xml = '</Execute></s:Body>';
 		return $xml;
 	}
+        
+        private function getArrayAttribute($attributeName, array $haystack) {
+            $retval = false;
+            if ( isset( $haystack[ $attributeName ] ) ) {
+                $retval = $haystack[ $attributeName ];
+            }
+            return $retval;
+        }
+        
+        private function getSchemaType($typeOrArray) {
+            if ( is_array( $typeOrArray ) )  {
+                
+                $type = $this->getArrayAttribute( "type", $typeOrArray );
+                // TODO: if ( ! $type ) throws Error !!!
+                $defaultLogicalName = $this->getArrayAttribute( "defaultLogicalName", $typeOrArray );
+                $logicalName = $this->getArrayAttribute( "logicalName", $typeOrArray );
+                
+            } else {
+                $type = $typeOrArray;
+            }
+            return array( $type, $defaultLogicalName, $logicalName );
+        }
+        
+        private function getXmlByType($value, $type, $defaultLogicalName, $logicalName) {
+            $xml = false;
+            switch ( $type ) {
+                case "datetime":
+                    $xml .= $this->do_datetime_value( $key, $value );
+                    break;
+                case "float":
+                    $xml .= $this->do_generic_value( $key, $value, "double" );
+                    break;
+                case "guid":
+                    $xml .= $this->do_guid_value( $key, $value, $logicalName );
+                    break;
+                case "guid_array":
+                    $xml .= $this->do_array_entities_value($key, $value, $defaultLogicalName );
+                    break;
+                case "int":
+                    $xml .= $this->do_generic_value( $key, $value, "int" );
+                    break;
+                case "money":
+                    $xml .= $this->do_money_value( $key, $value );
+                    break;
+                case "option":
+                    $xml .= $this->do_option_value( $key, $value );
+                    break;
+                case "string":
+                    $xml .= $this->do_generic_value( $key, $value, "string" );
+                    break;
+            }
+            return $xml;
+        }
 
 	private function fetchEntityFields($entity) {
 
 		$schema = $entity->schema;
 		foreach ( $schema as $key=>$typeOrArray ) {
 
-			if ( is_array( $typeOrArray ) )  {
-				$type = $typeOrArray[ "type" ];
-				if ( isset( $typeOrArray[ "defaultLogicalName" ] ) ) $defaultLogicalName = $typeOrArray[ "defaultLogicalName" ];
-				if ( isset( $typeOrArray[ "logicalName" ] ) ) $logicalName = $typeOrArray[ "logicalName" ];
-			} else {
-				$type = $typeOrArray;
-			}
+                    list( $type, $defaultLogicalName, $logicalName ) = $this->getSchemaType( $typeOrArray );
+                    $value = $entity->{$key};
 
-			$value = $entity->{$key};
-
-			if ( false != $value ) {
-
-				switch ( $type ) {
-
-					case "datetime":
-						$xml .= $this->do_datetime_value( $key, $value );
-						break;
-					case "float":
-						$xml .= $this->do_generic_value( $key, $value, "double" );
-						break;
-					case "guid":
-						$xml .= $this->do_guid_value( $key, $value, $logicalName );
-						break;
-					case "guid_array":
-						$xml .= $this->do_array_entities_value($key, $value, $defaultLogicalName );
-						break;
-					case "int":
-						$xml .= $this->do_generic_value( $key, $value, "int" );
-						break;
-					case "money":
-						$xml .= $this->do_money_value( $key, $value );
-						break;
-					case "option":
-						$xml .= $this->do_option_value( $key, $value );
-						break;
-					case "string":
-						$xml .= $this->do_generic_value( $key, $value, "string" );
-						break;
-
-				}
-			}
+                    $xml = $this->getXmlByType( $value, $type, $defaultLogicalName, $logicalName );
+                        
 		}
 
 		return $xml;
@@ -314,21 +331,21 @@ class CrmXmlBuilder {
 		$xml .= $this->getRequestHead( $requestName );
 
 		switch ($requestName) {
-			case "Retrieve":
-			case "RetrieveMultiple":
-				$xml .= $this->do_query_value($entity->logicalName, $conditions, $columns);
-				break;
-			case "SetState":
-				$xml .= $this->do_entityreference_value( 'EntityMoniker', $guid, $entity->logicalName );
-				$xml .= $this->do_option_value( 'State', $entity->state, $entity->logicalName );
-				$xml .= $this->do_option_value( 'Status', $entity->status, $entity->logicalName );
-				break;
-			case "Delete":
-				$xml .= $this->do_entityreference_value( 'Target', $guid, $entity->logicalName );
-				break;
-			case "Update":
-			case "Create":
-				$xml .= $this->do_entity_value( 'Target', $entity );
+                    case "Retrieve":
+                    case "RetrieveMultiple":
+                        $xml .= $this->do_query_value( $entity->logicalName, $conditions, $columns );
+                        break;
+                    case "SetState":
+                        $xml .= $this->do_entityreference_value( 'EntityMoniker', $guid, $entity->logicalName );
+                        $xml .= $this->do_option_value( 'State', $entity->state, $entity->logicalName );
+                        $xml .= $this->do_option_value( 'Status', $entity->status, $entity->logicalName );
+                        break;
+                    case "Delete":
+                        $xml .= $this->do_entityreference_value( 'Target', $guid, $entity->logicalName );
+                        break;
+                    case "Update":
+                    case "Create":
+                        $xml .= $this->do_entity_value( 'Target', $entity );
 		}
 
 		$xml .= $this->getRequestTail( $requestName );
