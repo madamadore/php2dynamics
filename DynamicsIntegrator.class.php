@@ -30,7 +30,7 @@ class DynamicsIntegrator
 //	private static $liveIDPassword = "Habo6863";
 
  	private static $liveIDUsername = "admin@topbike.onmicrosoft.com";
-	private static $liveIDPassword = "2012Topbike";
+	private static $liveIDPassword = "2015__TB";
 	private static $organizationServiceURL = "https://topbike.crm4.dynamics.com/XRMServices/2011/Organization.svc";
 	private static $securityData;
 	private static $alphabet = array(   'a', 'b', 'c', 'd', 'e',
@@ -519,6 +519,13 @@ class DynamicsIntegrator
 		return $accountsArray;
 	}
 
+        /**
+         * @param $conditions An array of array. 
+         *                      Each sub-array has: 
+         *                          ["attribute", "operator", "value"]. 
+         *                      Possible operator:
+         *                          Equal, Like, GreaterThan, LessThan, NotEqual
+         */
 	public function doRequest($entity, $requestName = "Create", $guid = "00000000-0000-0000-0000-000000000000", $conditions = array(), $columns = "all") {
 
             global $_DEBUG_MODE;

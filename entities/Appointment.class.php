@@ -24,7 +24,7 @@ class Appointment extends ReadOnlyEntity {
     );
     
     public static function getInstance() {
-        return new Appointemnt();
+        return new Appointment();
     }
     
     public static function RetrieveMultiple($conditions = array(), $columns = "all") {

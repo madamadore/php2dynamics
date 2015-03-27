@@ -1,5 +1,40 @@
 <?php
 
+function testGetBookings() {
+    ?>
+  <div class="panel panel-default">
+    <div class="panel-heading" role="tab" id="headingBooks">
+      <h4 class="panel-title">
+        <a data-toggle="collapse" data-parent="#accordion" href="#collapseBooks" aria-expanded="false" aria-controls="collapseBooks">
+          <h3>All Bookings (between 01/03/2012 and 05/03/2012):</h3>
+        </a>
+      </h4>
+    </div>
+    <div id="collapseBooks" class="panel-collapse collapse in" role="tabpanel" aria-labelledby="headingBooks">
+      <div class="panel-body">
+          <?php
+    $conditions = array( 
+        array("attribute" => "scheduledstart", "operator" => "GreaterThan", "value" => "2012-03-01"),
+        array("attribute" => "scheduledend", "operator" => "LessThan", "value" => "2012-03-05"),
+    );
+    $arrayOf = Booking::RetrieveMultiple( $conditions );
+    
+    if ( $arrayOf ) {
+            
+        echo "<pre>";
+        foreach ( $arrayOf as $single ) {
+            var_dump( $single );
+        }
+        echo "</pre>";
+        
+    }
+    ?>
+      </div>
+    </div>
+  </div>
+    <?php
+}
+
 function testGetBooking() {
     
     testBooking( "B77C3C8B-E9B8-E411-80D6-C4346BAD7228" );
@@ -9,10 +44,20 @@ function testGetBooking() {
 }
 
 function testBooking($guid) {
+    ?>
+  <div class="panel panel-default">
+    <div class="panel-heading" role="tab" id="headingBook">
+      <h4 class="panel-title">
+        <a data-toggle="collapse" data-parent="#accordion" href="#collapseBook" aria-expanded="false" aria-controls="collapseBook">
+          <h3>Booking ID: <?php echo $guid ?> </h3>
+        </a>
+      </h4>
+    </div>
+    <div id="collapseBook" class="panel-collapse collapse in" role="tabpanel" aria-labelledby="headingBook">
+      <div class="panel-body">
+          <?php
     
     $arrayOfBooking = Booking::Retrieve($guid);
-
-    echo "<h3>Booking ID:</h3>" . $guid . "<br />";
     
     if ( $arrayOfBooking ) {
             
@@ -23,6 +68,11 @@ function testBooking($guid) {
         echo "</pre>";
         
     }
+    ?>
+      </div>
+    </div>
+  </div>
+    <?php
 }
 
 function testReadXMLBooking() {

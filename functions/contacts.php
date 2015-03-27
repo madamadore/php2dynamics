@@ -1,5 +1,40 @@
 <?php
 
+function testGetContacts() {
+    ?>
+  <div class="panel panel-default">
+    <div class="panel-heading" role="tab" id="headingCons">
+      <h4 class="panel-title">
+        <a data-toggle="collapse" data-parent="#accordion" href="#collapseCons" aria-expanded="false" aria-controls="collapseCons">
+          <h3>All Contacts starting with 'Ma':</h3>
+        </a>
+      </h4>
+    </div>
+    <div id="collapseCons" class="panel-collapse collapse in" role="tabpanel" aria-labelledby="headingCons">
+      <div class="panel-body">
+          <?php
+    $conditions = array( 
+        array("attribute" => "firstname", "operator" => "Like", "value" => "Ma%")
+    );
+    
+    $arrayOf = Contact::RetrieveMultiple( $conditions );
+    
+    if ( $arrayOf ) {
+            
+        echo "<pre>";
+        foreach ( $arrayOf as $single ) {
+            var_dump( $single );
+        }
+        echo "</pre>";
+        
+    }
+    ?>
+      </div>
+    </div>
+  </div>
+    <?php
+}
+
 function testGetContact() {
     
     testContact( "47f0189b-1bba-e111-b50b-d4856451dc79" );  // Rimmer Lankaster
@@ -8,10 +43,19 @@ function testGetContact() {
 }
 
 function testContact($guid) {
-    
+    ?>
+  <div class="panel panel-default">
+    <div class="panel-heading" role="tab" id="headingCon">
+      <h4 class="panel-title">
+        <a data-toggle="collapse" data-parent="#accordion" href="#collapseCon" aria-expanded="false" aria-controls="collapseCon">
+          <h3>Contact ID: <?php echo $guid ?> </h3>
+        </a>
+      </h4>
+    </div>
+    <div id="collapseCon" class="panel-collapse collapse in" role="tabpanel" aria-labelledby="headingCon">
+      <div class="panel-body">
+          <?php
     $arrayOfContacts = Contact::Retrieve( $guid );
-
-    echo "<h3>Contact ID:</h3>" . $guid . "<br />";
     
     if ( $arrayOfContacts ) {
             
@@ -21,7 +65,12 @@ function testContact($guid) {
         }
         echo "</pre>";
         
-    }   
+    }  
+    ?>
+      </div>
+    </div>
+  </div>
+    <?php
 }
 
 // **********
