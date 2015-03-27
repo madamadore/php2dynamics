@@ -1,12 +1,16 @@
 <?php
 
+const USER_ID = "admin@topbike.onmicrosoft.com";
+const PASSWORD = "2015__TB";
+const SERVICE_URL = "https://topbike.crm4.dynamics.com/XRMServices/2011/Organization.svc";
+
 function testDeleteContact($integrator) {
 	echo "<b>TEST - DELETE CONTACT</b>";
 	$integrator->deleteContact( "1e1aa07f-f4b8-e411-80d8-c4346bacef70" );
 }
 
-function testUpdateContact($integrator) {
-
+function testUpdateContact() {
+        
 	echo "<b>TEST - UPDATE CONTACT</b> - START<br/>";
 	$user = new Contact("Matteo Avanzini");
 	$user->firstname = "Matteo";
@@ -15,10 +19,11 @@ function testUpdateContact($integrator) {
 	$user->mobilephone = "0123456789";
 	$user->description = "This user is a test one. You can safely delete it of you catch him";
 
-	$integrator->updateContact( $user, "ad4c86fd-f5b8-e411-80d8-c4346bacef70" );
+        $integrator = DynamicsIntegrator::getInstance( USER_ID, PASSWORD, SERVICE_URL );
+	$integrator->doRequest( $user, "Update", "ad4c86fd-f5b8-e411-80d8-c4346bacef70" );
 }
 
-function testCreateContact($integrator) {
+function testCreateContact() {
 
 	echo "<b>TEST - CREATE CONTACT</b> - START<br/>";
 	$user = new Contact("User Test");
@@ -28,7 +33,8 @@ function testCreateContact($integrator) {
 	$user->mobilephone = "0123456789";
 	$user->description = "This user is a test one. You can safely delete it of you catch him";
 
-	$contact_id = $integrator->createContact( $user );
+        $integrator = DynamicsIntegrator::getInstance( USER_ID, PASSWORD, SERVICE_URL );
+	$contact_id = $integrator->doRequest( $user, "Create" );
 
 	echo "Contatto creato: " . $contact_id . "<br/>";
 }
@@ -42,6 +48,9 @@ function testGetContact() {
 
 function testContact($guid) {
     
+    $integrator = DynamicsIntegrator::getInstance( USER_ID, PASSWORD, SERVICE_URL );
+    $contact_id = $integrator->doRequest( $user, "Retrieve" ); // ?!?!?
+        
     $arrayOfContacts = Contact::Retrieve( $guid );
 
     echo "<h3>Booking ID:</h3>" . $guid . "<br />";

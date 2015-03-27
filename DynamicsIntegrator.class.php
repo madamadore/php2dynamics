@@ -14,10 +14,6 @@ require_once(dirname(__FILE__) . '/dynamics/Entity.class.php');
  */
 class DynamicsIntegrator
 {
-// 	private static $liveIDUsername = "website@topbike.onmicrosoft.com";
-//	private static $liveIDPassword = "TBR_2k13";
-// 	private static $liveIDUsername = "matteo@topbike.onmicrosoft.com";
-//	private static $liveIDPassword = "Habo6863";
 
  	private static $liveIDUsername = "admin@topbike.onmicrosoft.com";
 	private static $liveIDPassword = "2012Topbike";
@@ -27,7 +23,7 @@ class DynamicsIntegrator
 	private static $instance;
 	private static $debug_mode = false;
 
-	private function __construct($serviceURL = null, $IDUsername = null, $IDPassword = null)
+        private function __construct($serviceURL, $IDUsername, $IDPassword)
 	{
             if ( null !== $serviceURL ) {
                 self::$organizationServiceURL = $serviceURL;
@@ -41,11 +37,11 @@ class DynamicsIntegrator
             self::createSecurityData();
 	}
 
-	public static function getInstance($IDUsername = null, $IDPassword = null, $serviceURL = null)
+	public static function getInstance($IDUsername, $IDPassword, $serviceURL)
 	{
             if ( is_null( self::$instance ) )
             {
-                self::$instance = new self( $serviceURL = null, $IDUsername, $IDPassword );
+                self::$instance = new self( $serviceURL, $IDUsername, $IDPassword );
             }
 
             return self::$instance;

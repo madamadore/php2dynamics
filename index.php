@@ -8,6 +8,7 @@ include_once "functions.php";
 
 echo "<h1>Test started</h1>";
 
+
 testGetContact();
 testGetBooking();
 // testReadXMLBooking();
