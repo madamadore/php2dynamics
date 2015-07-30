@@ -57,32 +57,26 @@ class DynamicsIntegrator
 
 	private function __construct($IDUsername = null, $IDPassword = null)
 	{
-		self::createSecurityData($IDUsername, $IDPassword);
+            self::createSecurityData($IDUsername, $IDPassword);
 	}
 
 	public static function getInstance($IDUsername = null, $IDPassword = null)
 	{
-		if ( is_null( self::$instance ) )
-		{
-			self::$instance = new self( $IDUsername, $IDPassword );
-		}
-
-		self::$instance = new self( $IDUsername, $IDPassword );
-
-		return self::$instance;
+            self::$instance = new self( $IDUsername, $IDPassword );
+            return self::$instance;
 	}
 
 	public static function createSecurityData($IDUsername = null, $IDPassword = null) {
 
-		try {
-			if (null === $IDUsername) $IDUsername = self::$liveIDUsername;
-			if (null === $IDPassword) $IDPassword = self::$liveIDPassword;
+            try {
+                if (null === $IDUsername) $IDUsername = self::$liveIDUsername;
+                if (null === $IDPassword) $IDPassword = self::$liveIDPassword;
 
-			$liveIDManager      = new LiveIDManager();
-			self::$securityData = $liveIDManager->authenticateWithLiveID( self::$organizationServiceURL, $IDUsername, $IDPassword );
-		} catch (Exception $ex) {
-			self::$securityData = null;
-		}
+                $liveIDManager      = new LiveIDManager();
+                self::$securityData = $liveIDManager->authenticateWithLiveID( self::$organizationServiceURL, $IDUsername, $IDPassword );
+            } catch (Exception $ex) {
+                self::$securityData = null;
+            }
 	}
 
 	public static function getSecurityData() {

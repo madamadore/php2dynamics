@@ -1,29 +1,30 @@
 <?php
 
 function testGetBookings() {
-    ?>
-  <div class="panel panel-default">
-    <div class="panel-heading" role="tab" id="headingBooks">
-      <h4 class="panel-title">
-        <a data-toggle="collapse" data-parent="#accordion" href="#collapseBooks" aria-expanded="false" aria-controls="collapseBooks">
-          <h3>All Bookings (between 01/03/2012 and 05/03/2012):</h3>
-        </a>
-      </h4>
-    </div>
-    <div id="collapseBooks" class="panel-collapse collapse in" role="tabpanel" aria-labelledby="headingBooks">
-      <div class="panel-body">
-          <?php
     $conditions = array( 
         array("attribute" => "scheduledstart", "operator" => "GreaterThan", "value" => "2012-03-01"),
         array("attribute" => "scheduledend", "operator" => "LessThan", "value" => "2012-03-05"),
     );
     $arrayOf = Booking::RetrieveMultiple( $conditions );
+    ?>
+  <div class="panel panel-default">
+    <div class="panel-heading" role="tab" id="headingBooks">
+      <h4 class="panel-title">
+        <a class="collapsed" data-toggle="collapse" data-parent="#accordion" href="#collapseBooks" aria-expanded="false" aria-controls="collapseBooks">
+          <h3>All Bookings (between 01/03/2012 and 05/03/2012): (<?php echo count( $arrayOf ); ?>)</h3>
+        </a>
+      </h4>
+    </div>
+    <div id="collapseBooks" class="panel-collapse collapse" role="tabpanel" aria-labelledby="headingBooks">
+      <div class="panel-body">
+          <?php
     
     if ( $arrayOf ) {
             
         echo "<pre>";
         foreach ( $arrayOf as $single ) {
             var_dump( $single );
+            echo "<hr />";
         }
         echo "</pre>";
         
@@ -37,27 +38,26 @@ function testGetBookings() {
 
 function testGetBooking() {
     
-    testBooking( "B77C3C8B-E9B8-E411-80D6-C4346BAD7228" );
-    testBooking( "E2142DE0-40BA-E411-80D8-C4346BACEF70" );
-    testBooking( "4BFEA247-40BA-E411-80D8-FC15B4280CB8" );
+    testBooking( "E2142DE0-40BA-E411-80D8-C4346BACEF70", "Book2" );
+    testBooking( "B77C3C8B-E9B8-E411-80D6-C4346BAD7228", "Book1" );
+    testBooking( "4BFEA247-40BA-E411-80D8-FC15B4280CB8", "Book3" );
      
 }
 
-function testBooking($guid) {
+function testBooking($guid, $divId = "Book") {
+    $arrayOfBooking = Booking::Retrieve( $guid );
     ?>
   <div class="panel panel-default">
-    <div class="panel-heading" role="tab" id="headingBook">
+    <div class="panel-heading" role="tab" id="heading<?php echo $divId ?>">
       <h4 class="panel-title">
-        <a data-toggle="collapse" data-parent="#accordion" href="#collapseBook" aria-expanded="false" aria-controls="collapseBook">
-          <h3>Booking ID: <?php echo $guid ?> </h3>
+        <a class="collapsed" data-toggle="collapse" data-parent="#accordion" href="#collapse<?php echo $divId ?>" aria-expanded="false" aria-controls="collapse<?php echo $divId ?>">
+          <h3>Booking ID: <?php echo $guid ?> <?php  echo ( ! $arrayOfBooking ) ? "FAIL" : "SUCCESS"; ?></h3>
         </a>
       </h4>
     </div>
-    <div id="collapseBook" class="panel-collapse collapse in" role="tabpanel" aria-labelledby="headingBook">
+    <div id="collapse<?php echo $divId ?>" class="panel-collapse collapse" role="tabpanel" aria-labelledby="heading<?php echo $divId ?>">
       <div class="panel-body">
           <?php
-    
-    $arrayOfBooking = Booking::Retrieve($guid);
     
     if ( $arrayOfBooking ) {
             

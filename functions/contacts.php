@@ -1,29 +1,30 @@
 <?php
 
 function testGetContacts() {
-    ?>
-  <div class="panel panel-default">
-    <div class="panel-heading" role="tab" id="headingCons">
-      <h4 class="panel-title">
-        <a data-toggle="collapse" data-parent="#accordion" href="#collapseCons" aria-expanded="false" aria-controls="collapseCons">
-          <h3>All Contacts starting with 'Ma':</h3>
-        </a>
-      </h4>
-    </div>
-    <div id="collapseCons" class="panel-collapse collapse in" role="tabpanel" aria-labelledby="headingCons">
-      <div class="panel-body">
-          <?php
     $conditions = array( 
         array("attribute" => "firstname", "operator" => "Like", "value" => "Ma%")
     );
     
     $arrayOf = Contact::RetrieveMultiple( $conditions );
-    
+    ?>
+  <div class="panel panel-default">
+    <div class="panel-heading" role="tab" id="headingCons">
+      <h4 class="panel-title">
+        <a class="collapsed" data-toggle="collapse" data-parent="#accordion" href="#collapseCons" aria-expanded="false" aria-controls="collapseCons">
+          <h3>All Contacts starting with 'Ma': (<?php echo count( $arrayOf ); ?>) <?php  echo ( ! $arrayOf ) ? "FAIL" : "SUCCESS"; ?></h3>
+        </a>
+      </h4>
+    </div>
+    <div id="collapseCons" class="panel-collapse collapse" role="tabpanel" aria-labelledby="headingCons">
+      <div class="panel-body">
+          <?php
+
     if ( $arrayOf ) {
             
         echo "<pre>";
         foreach ( $arrayOf as $single ) {
             var_dump( $single );
+            echo "<hr/>";
         }
         echo "</pre>";
         
@@ -37,22 +38,22 @@ function testGetContacts() {
 
 function testGetContact() {
     
-    testContact( "47f0189b-1bba-e111-b50b-d4856451dc79" );  // Rimmer Lankaster
-    testContact( "1e1aa07f-f4b8-e411-80d8-c4346bacef70" );  // has to be void
+    testContact( "47f0189b-1bba-e111-b50b-d4856451dc79", "Con1" );  // Rimmer Lankaster
+    testContact( "1e1aa07f-f4b8-e411-80d8-c4346bacef70", "Con2" );  // has to be void
      
 }
 
-function testContact($guid) {
+function testContact($guid, $divId = "Con") {
     ?>
   <div class="panel panel-default">
-    <div class="panel-heading" role="tab" id="headingCon">
+    <div class="panel-heading" role="tab" id="heading<?php echo $divId ?>">
       <h4 class="panel-title">
-        <a data-toggle="collapse" data-parent="#accordion" href="#collapseCon" aria-expanded="false" aria-controls="collapseCon">
+        <a class="collapsed" data-toggle="collapse" data-parent="#accordion" href="#collapse<?php echo $divId ?>" aria-expanded="false" aria-controls="collapse<?php echo $divId ?>">
           <h3>Contact ID: <?php echo $guid ?> </h3>
         </a>
       </h4>
     </div>
-    <div id="collapseCon" class="panel-collapse collapse in" role="tabpanel" aria-labelledby="headingCon">
+    <div id="collapse<?php echo $divId ?>" class="panel-collapse collapse" role="tabpanel" aria-labelledby="heading<?php echo $divId ?>">
       <div class="panel-body">
           <?php
     $arrayOfContacts = Contact::Retrieve( $guid );

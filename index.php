@@ -10,7 +10,10 @@ include_once "functions/appointments.php";
 include_once "functions/contacts.php";
 include_once "functions/bookings.php";
 include_once "functions/bikemodels.php";
+include_once "functions/bikes.php";
 include_once "functions/equipments.php";
+include_once "functions/prices.php";
+include_once "functions/products.php";
 ?>
 <html>
 <head>
@@ -37,30 +40,50 @@ include_once "functions/equipments.php";
 
 </head>
 <body>
-    <h1>Test started</h1>
+    <div class="container">
+        <h1>Test started</h1>
 
-   <div class="panel-group" id="accordion" role="tablist" aria-multiselectable="true">
-    <?php 
+        <div class="panel-group" id="accordion" role="tablist" aria-multiselectable="true">
+        <?php 
 
-    testGetAppointments(); 
+        // Appointment
+        testGetAppointments(); 
+        testGetAppointment();
+        
+        // Contact
+        testGetContacts();
+        testGetContact();
 
-    testGetContacts();
-    testGetContact();
-
-    testGetBookings();
-    testGetBooking();
-
-    testGetBikeModels();
-    testGetBikeModel();
-
-    testGetEquipments();
-    testGetEquipment();
-    ?>
+        // Booking
+        testGetBookings();
+        testGetBooking();
+        
+        // Bike Model
+        testGetBikeModels();
+        testGetBikeModel();
+        
+        // Equipment
+        testGetEquipments();
+        testGetEquipment();
+        
+        // Bikes
+        testGetBikes();
+        testGetBike();
+        
+        // Prices
+        testGetPrices();
+        testGetPrice();
+        
+        // Products
+        testGetProducts();
+        
+        ?>
+        </div>
     </div>
     
     <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
     <!-- Latest compiled and minified JavaScript -->
-    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/js/bootstrap.min.js"></script> 
+    <script src="bootstrap/3.3.2/js/bootstrap.min.js"></script> 
 </body>
 </html>    
