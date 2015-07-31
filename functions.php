@@ -1,5 +1,12 @@
 <?php
 
+require_once(dirname(__FILE__) . '/entities/Booking.class.php');
+require_once(dirname(__FILE__) . '/entities/Bike.class.php');
+require_once(dirname(__FILE__) . '/entities/BikeModel.class.php');
+require_once(dirname(__FILE__) . '/entities/Equipment.class.php');
+require_once(dirname(__FILE__) . '/entities/Price.class.php');
+require_once(dirname(__FILE__) . '/entities/Product.class.php');
+
 function testSecurityData($integrator) {
 	echo "Dynamic integrator created<br/>";
 

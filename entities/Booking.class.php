@@ -40,9 +40,6 @@ class Booking extends Entity {
             $this->subject = $subject;
 	}
         
-        public function Create() {}
-        public function Update() {}
-        
         public static function getInstance() {
             return new Booking( "emptyobject" );
         }
@@ -65,7 +62,7 @@ class Booking extends Entity {
             return $entities;
         }
     
-        protected static function filterResponse($response, $schema) {
+        protected static function filterResponse($response, $schema = array()) {
             
             $xmlReader = new CrmXmlReader(false);
             $entities = $xmlReader->getEntities( $response, $schema );
@@ -78,6 +75,4 @@ class Booking extends Entity {
             }
             return $bookings;
         }
-        
-        public static function Delete($guid) {}
 }

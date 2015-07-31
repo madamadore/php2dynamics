@@ -38,7 +38,7 @@ function testGetBookings() {
 
 function testGetBooking() {
     
-    testBooking( "E2142DE0-40BA-E411-80D8-C4346BACEF70", "Book2" );
+    testBooking( "B208AEB8-EC20-E511-8111-C4346BACEF70", "Book2" ); // Jesse Marinus: 2-7-2015 16:30 -> 31-7-2015 19:00
     testBooking( "B77C3C8B-E9B8-E411-80D6-C4346BAD7228", "Book1" );
     testBooking( "4BFEA247-40BA-E411-80D8-FC15B4280CB8", "Book3" );
      

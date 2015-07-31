@@ -1,4 +1,5 @@
 <?php
+include_once (dirname(__FILE__) . '/../dynamics/DynamicsIntegrator.class.php');
 
 abstract class ReadOnlyEntity {
     

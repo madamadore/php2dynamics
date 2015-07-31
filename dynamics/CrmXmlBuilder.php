@@ -20,11 +20,12 @@ class CrmXmlBuilder {
                         <b:LogicalName>' . $entity->logicalName . '</b:LogicalName>
                         <b:RelatedEntities />
                         </b:Entity>';
+                return $xml;
 	}
 
 	private function do_entity_value($key, $entity) {
 
-		$xml .= '<b:KeyValuePairOfstringanyType>
+		$xml = '<b:KeyValuePairOfstringanyType>
 					<c:key>' . $key . '</c:key>
 					<c:value i:type="b:Entity">
 						<b:Attributes>';
@@ -36,6 +37,7 @@ class CrmXmlBuilder {
 					<b:LogicalName>' . $entity->logicalName . '</b:LogicalName>
 	                <b:RelatedEntities />
 				</c:value><b:KeyValuePairOfstringanyType>';
+                return $xml;
 	}
 
 	private function do_array_entities_value($key, $arrayOfEntities, $defaultLogicalName) {
@@ -101,9 +103,10 @@ class CrmXmlBuilder {
 	private function do_generic_value($key, $value, $type) {
 
 		$xml = '<b:KeyValuePairOfstringanyType>
-					<c:key>' . $key . '</c:key>
-					<c:value i:type="d:' . $type . '" xmlns:d="http://www.w3.org/2001/XMLSchema">'.$value.'</c:value>
-				</b:KeyValuePairOfstringanyType>';
+                            <c:key>' . $key . '</c:key>
+                            <c:value i:type="d:' . $type . '" '
+                                . 'xmlns:d="http://www.w3.org/2001/XMLSchema">'.$value.'</c:value>
+                        </b:KeyValuePairOfstringanyType>';
 		return $xml;
 	}
 
@@ -151,7 +154,7 @@ class CrmXmlBuilder {
 
 		$xml = '<b:KeyValuePairOfstringanyType>
 		            <c:key>Query</c:key>
-					<c:value i:type="b:QueryExpression">';
+                            <c:value i:type="b:QueryExpression">';
 
 		$xml .= '<b:ColumnSet>';
 		if ( "all" == $columns ) {
@@ -259,53 +262,54 @@ class CrmXmlBuilder {
 
 	private function fetchEntityFields($entity) {
 
+                $xml = "";
 		$schema = $entity->schema;
 		foreach ( $schema as $key=>$typeOrArray ) {
 
-			if ( is_array( $typeOrArray ) )  {
-				$type = $typeOrArray[ "type" ];
-				if ( isset( $typeOrArray[ "defaultLogicalName" ] ) ) $defaultLogicalName = $typeOrArray[ "defaultLogicalName" ];
-				if ( isset( $typeOrArray[ "logicalName" ] ) ) $logicalName = $typeOrArray[ "logicalName" ];
-			} else {
-				$type = $typeOrArray;
-			}
+                    if ( is_array( $typeOrArray ) )  {
+                        $type = $typeOrArray[ "type" ];
+                        if ( isset( $typeOrArray[ "defaultLogicalName" ] ) ) $defaultLogicalName = $typeOrArray[ "defaultLogicalName" ];
+                        if ( isset( $typeOrArray[ "logicalName" ] ) ) $logicalName = $typeOrArray[ "logicalName" ];
+                    } else {
+                        $type = $typeOrArray;
+                    }
 
-			$value = $entity->{$key};
+                    $value = $entity->{$key};
 
-			if ( false != $value ) {
+                    if ( false != $value ) {
 
-				switch ( $type ) {
+                        switch ( $type ) {
 
-					case "datetime":
-						$xml .= $this->do_datetime_value( $key, $value );
-						break;
-					case "float":
-						$xml .= $this->do_generic_value( $key, $value, "double" );
-						break;
-					case "guid":
-						$xml .= $this->do_guid_value( $key, $value, $logicalName );
-						break;
-					case "guid_array":
-						$xml .= $this->do_array_entities_value($key, $value, $defaultLogicalName );
-						break;
-					case "int":
-						$xml .= $this->do_generic_value( $key, $value, "int" );
-						break;
-					case "money":
-						$xml .= $this->do_money_value( $key, $value );
-						break;
-					case "option":
-						$xml .= $this->do_option_value( $key, $value );
-						break;
-					case "string":
-						$xml .= $this->do_generic_value( $key, $value, "string" );
-						break;
+                            case "datetime":
+                                $xml .= $this->do_datetime_value( $key, $value );
+                                break;
+                            case "float":
+                                $xml .= $this->do_generic_value( $key, $value, "double" );
+                                break;
+                            case "guid":
+                                $xml .= $this->do_guid_value( $key, $value, $logicalName );
+                                break;
+                            case "guid_array":
+                                $xml .= $this->do_array_entities_value($key, $value, $defaultLogicalName );
+                                break;
+                            case "int":
+                                $xml .= $this->do_generic_value( $key, $value, "int" );
+                                break;
+                            case "money":
+                                $xml .= $this->do_money_value( $key, $value );
+                                break;
+                            case "option":
+                                $xml .= $this->do_option_value( $key, $value );
+                                break;
+                            case "string":
+                                $xml .= $this->do_generic_value( $key, $value, "string" );
+                                break;
 
-				}
-			}
-		}
+                        }
+                    }
+            }
 
-		return $xml;
+            return $xml;
 	}
 
 	private function getRequestBody($entity, $requestName = "Create", $guid = "00000000-0000-0000-0000-000000000000", $conditions = array(), $columns = "all") {

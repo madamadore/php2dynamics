@@ -1,19 +1,8 @@
 <?php
-require_once(dirname(__FILE__) . '/dynamics/LiveIDManager.php');
-require_once(dirname(__FILE__) . '/dynamics/EntityUtils.php');
-require_once(dirname(__FILE__) . '/dynamics/CrmXmlBuilder.php');
-require_once(dirname(__FILE__) . '/dynamics/CrmXmlReader.php');
-
-require_once(dirname(__FILE__) . '/entities/ReadOnlyEntity.class.php');
-require_once(dirname(__FILE__) . '/entities/Entity.class.php');
-require_once(dirname(__FILE__) . '/entities/Appointment.class.php');
-require_once(dirname(__FILE__) . '/entities/Booking.class.php');
-require_once(dirname(__FILE__) . '/entities/Bike.class.php');
-require_once(dirname(__FILE__) . '/entities/BikeModel.class.php');
-require_once(dirname(__FILE__) . '/entities/Contact.class.php');
-require_once(dirname(__FILE__) . '/entities/Equipment.class.php');
-require_once(dirname(__FILE__) . '/entities/Price.class.php');
-require_once(dirname(__FILE__) . '/entities/Product.class.php');
+require_once(dirname(__FILE__) . '/LiveIDManager.php');
+require_once(dirname(__FILE__) . '/EntityUtils.php');
+require_once(dirname(__FILE__) . '/CrmXmlBuilder.php');
+require_once(dirname(__FILE__) . '/CrmXmlReader.php');
 
 /**
  * This class realize the integration bewtween PHP and Microsoft Dynamics.
@@ -24,21 +13,10 @@ require_once(dirname(__FILE__) . '/entities/Product.class.php');
  */
 class DynamicsIntegrator
 {
-// 	private static $liveIDUsername = "website@topbike.onmicrosoft.com";
-//	private static $liveIDPassword = "TBR_2k13";
-// 	private static $liveIDUsername = "matteo@topbike.onmicrosoft.com";
-//	private static $liveIDPassword = "Habo6863";
-
- 	private static $liveIDUsername = "admin@topbike.onmicrosoft.com";
-	private static $liveIDPassword = "2015__TB";
-	private static $organizationServiceURL = "https://topbike.crm4.dynamics.com/XRMServices/2011/Organization.svc";
+ 	private static $liveIDUsername;
+	private static $liveIDPassword;
+	private static $organizationServiceURL;
 	private static $securityData;
-	private static $alphabet = array(   'a', 'b', 'c', 'd', 'e',
-									    'f', 'g', 'h', 'i', 'j',
-		                                'k', 'l', 'm', 'n', 'o',
-									    'p', 'q', 'r', 's', 't',
-		                                'u', 'v', 'w', 'x', 'y',
-										'z' );
 
 	private static $instance;
 	private static $debug_mode = false;
@@ -55,14 +33,21 @@ class DynamicsIntegrator
 	public static $_BOOKING_TYPE = array( "Web" => "108600000", "Direct" => "108600003", "Partner" => "108600001",
 	                                      "Third Party" => "108600002", "Local Party" => "108600004");
 
-	private function __construct($IDUsername = null, $IDPassword = null)
+	private function __construct()
 	{
-            self::createSecurityData($IDUsername, $IDPassword);
+            $json_file = file_get_contents(dirname(__FILE__) . '/config.json');
+            $jfo = json_decode($json_file);
+            
+            self::$liveIDUsername = $jfo->username;
+            self::$liveIDPassword = $jfo->password;
+            self::$organizationServiceURL = $jfo->url;
+
+            self::createSecurityData(self::$liveIDUsername, self::$liveIDPassword);
 	}
 
-	public static function getInstance($IDUsername = null, $IDPassword = null)
+	public static function getInstance()
 	{
-            self::$instance = new self( $IDUsername, $IDPassword );
+            self::$instance = new self();
             return self::$instance;
 	}
 
@@ -165,13 +150,6 @@ class DynamicsIntegrator
 		return $response;
 	}
 
-	private function emptyObj($obj) {
-		foreach ( $obj as $k ) {
-			return false;
-		}
-		return true;
-	}
-
 	public function updateContact($contact, $guid) {
 
 		$response = $this->doRequest( $contact, "Update", $guid );
@@ -185,25 +163,6 @@ class DynamicsIntegrator
 		}
 
 		return $created_id;
-	}
-
-	public function createContact($contact) {
-
-		$response = $this->doRequest($contact);
-
-		$responsedom = new DomDocument();
-		$responsedom->loadXML($response);
-		$nodes = $responsedom->getElementsbyTagName("keyvaluepairofstringanytype");
-		$created_id = false;
-		foreach ($nodes as $node) {
-			$created_id =  $node->getElementsbyTagName("value")->item(0)->textContent;
-		}
-
-		return $created_id;
-	}
-
-	public function deleteContact($guid) {
-		$response = $this->doRequest( $contact, "Delete", $guid );
 	}
 
 	public function getTours($start_date, $end_date, $language, $product_id) {}

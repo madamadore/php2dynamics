@@ -16,15 +16,12 @@ class Contact extends Entity {
 	);
 
 	var $validate = array( "required" => "fullname",
-							"email" => "emailaddress",
-							"phonenumber" => "mobilephone" );
+                                "email" => "emailaddress",
+				"phonenumber" => "mobilephone" );
 
 	function __construct($fullname) {
 		$this->fullname = $fullname;
 	}
-
-        public function Create() {}
-        public function Update() {}
         
         public static function RetrieveMultiple($conditions = array(), $columns = "all") {
             return self::RetriveSingle( false, $conditions, $columns );
@@ -44,7 +41,5 @@ class Contact extends Entity {
 
             return $entities;
         }
-
-        public static function Delete($guid) {}
         
 }

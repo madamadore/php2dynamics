@@ -1,4 +1,6 @@
 <?php
+require_once(dirname(__FILE__) . '/../entities/Appointment.class.php');
+
 function testGetAppointments() {
     
     $conditions = array( 
