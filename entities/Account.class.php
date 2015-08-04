@@ -1,5 +1,5 @@
 <?php
-require_once dirname(__FILE__) . "/../dynamics/Entity.class.php";
+require_once dirname(__FILE__) . "/../php2dynamics/Entity.class.php";
 
 class Account extends Entity {
 
