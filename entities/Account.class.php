@@ -3,16 +3,19 @@ require_once dirname(__FILE__) . "/../dynamics/Entity.class.php";
 
 class Account extends Entity {
 
-	var $logicalName = "account";
-	var $schema = array(
-		"fullname" => "string",
-	);
+    public function getSchema() {
+        return array(
+                "name" => "string",
+                "description" => "string"
+            );
+    }
+    
+    public function getLogicalName() {
+        return "account";
+    }
+    
+    public function getPrimaryKey() {
+        return "accountid";
+    }
 
-	function __construct($fullname) {
-            $this->fullname = $fullname;
-	}
-        
-        public static function getPrimaryKey() {
-            return "accountid";
-        }
 }
