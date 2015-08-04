@@ -4,16 +4,9 @@ error_reporting(E_ALL);
 global $_DEBUG_MODE;
 $_DEBUG_MODE = false;
 
-require_once "entities/Entity.class.php";
+require_once "dynamics/Entity.class.php";
 include_once "functions.php";
-include_once "functions/appointments.php";
 include_once "functions/contacts.php";
-include_once "functions/bookings.php";
-include_once "functions/bikemodels.php";
-include_once "functions/bikes.php";
-include_once "functions/equipments.php";
-include_once "functions/prices.php";
-include_once "functions/products.php";
 ?>
 <html>
 <head>
@@ -46,41 +39,9 @@ include_once "functions/products.php";
         <div class="panel-group" id="accordion" role="tablist" aria-multiselectable="true">
         <?php 
 
-        /*
-        // Appointment
-        testGetAppointments(); 
-        testGetAppointment();
-        */
-        // Contact
-        testGetContacts();
-        testGetContact();
-        $guid = testCreateContact();
-        echo $guid;
-
-        /*
-        // Booking
-        testGetBookings();
-        testGetBooking();
+        //testGetContact();
+        testCUDContact();
         
-        // Bike Model
-        testGetBikeModels();
-        testGetBikeModel();
-        
-        // Equipment
-        testGetEquipments();
-        testGetEquipment();
-        
-        // Bikes
-        testGetBikes();
-        testGetBike();
-        
-        // Prices
-        testGetPrices();
-        testGetPrice();
-        
-        // Products
-        testGetProducts();
-        */
         ?>
         </div>
     </div>

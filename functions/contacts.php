@@ -58,18 +58,12 @@ function testContact($guid, $divId = "Con") {
     <div id="collapse<?php echo $divId ?>" class="panel-collapse collapse" role="tabpanel" aria-labelledby="heading<?php echo $divId ?>">
       <div class="panel-body">
           <?php
-    $arrayOfContacts = Contact::Retrieve( $guid );
-    
-    if ( $arrayOfContacts ) {
-            
-        echo "<pre>";
-        foreach ( $arrayOfContacts as $contact ) {
+            $user = new Contact("test");
+            $contact = $user->RetrieveSingle( $guid );
+            echo "<pre>";
             var_dump( $contact );
-        }
-        echo "</pre>";
-        
-    }  
-    ?>
+            echo "</pre>";
+            ?>
       </div>
     </div>
   </div>
@@ -78,46 +72,45 @@ function testContact($guid, $divId = "Con") {
 
 // **********
 
-function testDeleteContact() {
-	echo "<b>TEST - DELETE CONTACT</b>";
-	Contact::Delete( "1e1aa07f-f4b8-e411-80d8-c4346bacef70" );
+function testCUDContact() {
+    echo "<b>TEST - CREATE CONTACT</b> - START<br/>";
+    
+    echo "<b>TEST - CREATE CONTACT</b> - START<br/>";
+    $user = new Contact("User Test");
+    $user->firstname = "User";
+    $user->lastname = "Test";
+    $user->emailaddress1 = "matteo.avanzini@gmail.com";
+    $user->mobilephone = "0123456789";
+    $user->description = "This user is a test one. You can safely delete it if you catch him";
+
+    $guid = $user->Create();
+    $user->setGuid($guid);
+    
+    echo "Creato contatto: " . $guid;
+    echo "<br/>";
+    
+    $user->emailaddress1 = "lomion@tiscali.it";
+    $update = $user->Update();
+    echo "Update contatto: [" . $update . "]";
+    echo "<br/>";
+    
+    $matteo = $user->RetrieveSingle('AD4C86FD-F5B8-E411-80D8-C4346BACEF70');
+    echo "<pre>";
+    echo "Retrived contact: " . var_dump( $matteo ). "";
+    echo "</pre>";
+    $retrived = $user->RetrieveSingle( $guid );
+    echo "<pre>";
+    echo "Retrived contact: " . var_dump( $retrived ). "";
+    echo "</pre>";
+    echo "<br/>";
+    
+    $delete = $user->Delete();
+    echo "Delete contatto: [" . $delete . "]";
+    echo "<br/>";
+    
+    $deleted = $user->RetrieveSingle($guid);
+    echo "Delete contatto: [" . var_dump( $deleted ). "]";
+    echo "<br/>";
+     
 }
 
-function testUpdateContact() {
-
-	echo "<b>TEST - UPDATE CONTACT</b> - START<br/>";
-	$user = new Contact("Matteo Avanzini");
-	$user->firstname = "Matteo";
-	$user->lastname = "Avanzini";
-	$user->emailaddress1 = "lomion@tiscali.it";
-	$user->mobilephone = "0123456789";
-	$user->description = "This user is a test one. You can safely delete it of you catch him";
-
-	$user->Update( "ad4c86fd-f5b8-e411-80d8-c4346bacef70" );
-}
-
-function testCreateContact() {
-
-	echo "<b>TEST - CREATE CONTACT</b> - START<br/>";
-	$user = new Contact("User Test");
-	$user->firstname = "User";
-	$user->lastname = "Test";
-	$user->emailaddress1 = "matteo.avanzini@gmail.com";
-	$user->mobilephone = "0123456789";
-	$user->description = "This user is a test one. You can safely delete it if you catch him";
-
-        $response = $user->Create();
-        echo "<pre>";
-        var_dump($response);
-        echo "</pre>";
-        
-        $responsedom = new DomDocument();
-        $responsedom->loadXML( $response );
-        $nodes = $responsedom->getElementsbyTagName("keyvaluepairofstringanytype");
-        $created_id = false;
-        foreach ($nodes as $node) {
-            $created_id =  $node->getElementsbyTagName("value")->item(0)->textContent;
-        }
-
-	echo "Contatto creato: " . $created_id . "<br/>";
-}

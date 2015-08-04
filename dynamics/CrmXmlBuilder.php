@@ -10,14 +10,14 @@ class CrmXmlBuilder {
 		$this->securityData = $securityData;
 	}
 
-	private function do_entity_tag($entity) {
+	private function do_entity_tag($entity, $logicalName, $schema) {
 		$xml = '<b:Entity><b:Attributes>';
-		$xml .= $this->fetchEntityFields( $entity );
+		$xml .= $this->fetchEntityFields( $entity, $schema );
 		$xml .= '</b:Attributes>
                         <b:EntityState i:nil="true" />
                         <b:FormattedValues />
                         <b:Id>00000000-0000-0000-0000-000000000000</b:Id>
-                        <b:LogicalName>' . $entity->logicalName . '</b:LogicalName>
+                        <b:LogicalName>' . $logicalName . '</b:LogicalName>
                         <b:RelatedEntities />
                         </b:Entity>';
                 return $xml;
@@ -29,30 +29,35 @@ class CrmXmlBuilder {
 					<c:key>' . $key . '</c:key>
 					<c:value i:type="b:Entity">
 						<b:Attributes>';
-		$xml .= $this->fetchEntityFields( $entity );
+		$xml .= $this->fetchEntityFields( $entity, $entity->getSchema() );
 		$xml .= '</b:Attributes>
 					<b:EntityState i:nil="true" />
 	                <b:FormattedValues />
-	                <b:Id>' . $entity->guid . '</b:Id>
-					<b:LogicalName>' . $entity->logicalName . '</b:LogicalName>
+	                <b:Id>' . $entity->getGuid() . '</b:Id>
+					<b:LogicalName>' . $entity->getLogicalName() . '</b:LogicalName>
 	                <b:RelatedEntities />
-				</c:value><b:KeyValuePairOfstringanyType>';
+			</c:value>
+                        </b:KeyValuePairOfstringanyType>';
                 return $xml;
 	}
 
+        
 	private function do_array_entities_value($key, $arrayOfEntities, $defaultLogicalName) {
-
+                
 		$xml = '<b:KeyValuePairOfstringanyType>
                             <c:key>'.$key.'</c:key>
                             <c:value i:type="b:ArrayOfEntity">';
 
+                
 		foreach ($arrayOfEntities as $value) {
 
 			list( $guid, $logicalName ) = $this->get_guid_and_logicalName( $value );
 			if (!$logicalName) {
-				$logicalName = $defaultLogicalName;
+                            $logicalName = $defaultLogicalName;
 			}
 
+                      
+                        $entity = new stdClass();
 			$entity->logicalName = "activityparty";
 			$entity->schema = array(
 				"resourcespecid" => array( "type"=>"guid", "logicalName"=>"resourcespec" ),
@@ -67,7 +72,7 @@ class CrmXmlBuilder {
 			$entity->effort = 1;
 			$entity->ispartydeleted = "false";
 
-			$xml = $this->do_entity_tag( $entity );
+			$xml = $this->do_entity_tag( $entity, $entity->logicalName, $entity->schema );
 
 		}
 
@@ -260,10 +265,10 @@ class CrmXmlBuilder {
 		return $xml;
 	}
 
-	private function fetchEntityFields($entity) {
+	private function fetchEntityFields($object, $schema) {
 
                 $xml = "";
-		$schema = $entity->schema;
+		
 		foreach ( $schema as $key=>$typeOrArray ) {
 
                     if ( is_array( $typeOrArray ) )  {
@@ -274,37 +279,39 @@ class CrmXmlBuilder {
                         $type = $typeOrArray;
                     }
 
-                    $value = $entity->{$key};
+                    if ( isset( $object->{$key} ) ) {
+                        $value = $object->{$key};
 
-                    if ( false != $value ) {
+                        if ( false != $value ) {
 
-                        switch ( $type ) {
+                            switch ( $type ) {
 
-                            case "datetime":
-                                $xml .= $this->do_datetime_value( $key, $value );
-                                break;
-                            case "float":
-                                $xml .= $this->do_generic_value( $key, $value, "double" );
-                                break;
-                            case "guid":
-                                $xml .= $this->do_guid_value( $key, $value, $logicalName );
-                                break;
-                            case "guid_array":
-                                $xml .= $this->do_array_entities_value($key, $value, $defaultLogicalName );
-                                break;
-                            case "int":
-                                $xml .= $this->do_generic_value( $key, $value, "int" );
-                                break;
-                            case "money":
-                                $xml .= $this->do_money_value( $key, $value );
-                                break;
-                            case "option":
-                                $xml .= $this->do_option_value( $key, $value );
-                                break;
-                            case "string":
-                                $xml .= $this->do_generic_value( $key, $value, "string" );
-                                break;
+                                case "datetime":
+                                    $xml .= $this->do_datetime_value( $key, $value );
+                                    break;
+                                case "float":
+                                    $xml .= $this->do_generic_value( $key, $value, "double" );
+                                    break;
+                                case "guid":
+                                    $xml .= $this->do_guid_value( $key, $value, $logicalName );
+                                    break;
+                                case "guid_array":
+                                    $xml .= $this->do_array_entities_value($key, $value, $defaultLogicalName );
+                                    break;
+                                case "int":
+                                    $xml .= $this->do_generic_value( $key, $value, "int" );
+                                    break;
+                                case "money":
+                                    $xml .= $this->do_money_value( $key, $value );
+                                    break;
+                                case "option":
+                                    $xml .= $this->do_option_value( $key, $value );
+                                    break;
+                                case "string":
+                                    $xml .= $this->do_generic_value( $key, $value, "string" );
+                                    break;
 
+                            }
                         }
                     }
             }
@@ -320,15 +327,15 @@ class CrmXmlBuilder {
 		switch ($requestName) {
 			case "Retrieve":
 			case "RetrieveMultiple":
-				$xml .= $this->do_query_value($entity->logicalName, $conditions, $columns);
+				$xml .= $this->do_query_value($entity->getLogicalName(), $conditions, $columns);
 				break;
 			case "SetState":
-				$xml .= $this->do_entityreference_value( 'EntityMoniker', $guid, $entity->logicalName );
-				$xml .= $this->do_option_value( 'State', $entity->state, $entity->logicalName );
-				$xml .= $this->do_option_value( 'Status', $entity->status, $entity->logicalName );
+				$xml .= $this->do_entityreference_value( 'EntityMoniker', $guid, $entity->getLogicalName() );
+				$xml .= $this->do_option_value( 'State', $entity->getState(), $entity->getLogicalName() );
+				$xml .= $this->do_option_value( 'Status', $entity->getStatus(), $entity->getLogicalName() );
 				break;
 			case "Delete":
-				$xml .= $this->do_entityreference_value( 'Target', $guid, $entity->logicalName );
+				$xml .= $this->do_entityreference_value( 'Target', $guid, $entity->getLogicalName() );
 				break;
 			case "Update":
 			case "Create":
