@@ -13,6 +13,7 @@ require_once(dirname(__FILE__) . '/CrmXmlReader.php');
  */
 class DynamicsIntegrator
 {
+        
  	private static $liveIDUsername;
 	private static $liveIDPassword;
 	private static $organizationServiceURL;

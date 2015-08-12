@@ -1,8 +1,8 @@
 <?php
 
-Codeception\Specify\Config::setIgnoredProperties(['user']);
+Codeception\Specify\Config::setIgnoredProperties(['account']);
 
-class AccountTest extends \Codeception\TestCase\Test
+abstract class AccountTest extends \Codeception\TestCase\Test
 {
     use \Codeception\Specify;
     
@@ -10,15 +10,15 @@ class AccountTest extends \Codeception\TestCase\Test
      * @var \UnitTester
      */
     protected $tester;
-    protected $user;
+    protected $account;
 
     protected function _before()
     {        
-        $user = new Account();
-        $user->name = "Test Account";
-        $user->description = "This Account is a test one. You can safely delete it if you catch him";
+        $account = new Account();
+        $account->name = "Test Account";
+        $account->description = "This Account is a test one. You can safely delete it if you catch him";
         
-        $this->user = $user;
+        $this->account = $account;
     }
 
     protected function _after()
@@ -26,42 +26,42 @@ class AccountTest extends \Codeception\TestCase\Test
     }
 
     // tests
-    public function testCreateAccount()
+    public function testCrudAccount()
     {
         $this->specify("Create account", function() {
-            $generatedId = $this->user->Create();
-            $this->assertNotEmpty( $generatedId );
-            $this->user->setGuid( $generatedId );
+            $generatedId = $this->account->Create();
+            $this->assertTrue( (boolean) preg_match("/[0-9a-zA-Z]{8}-[0-9a-zA-Z]{4}-[0-9a-zA-Z]{4}-[0-9a-zA-Z]{4}-[0-9a-zA-Z]{12}/", $generatedId ) );
+            $this->account->setGuid( $generatedId );
         });
 
         $this->specify("Update account", function() {
-            $this->user->name = "Matteo Avanzini";
-            $update = $this->user->Update();
+            $this->account->name = "Matteo Avanzini";
+            $update = $this->account->Update();
             $this->assertTrue( $update, "Account has been updated" );
         });
         
         $this->specify("Retrieve account", function() {
-            $user = new Account();
-            $matteo = $user->RetrieveSingle( $this->user->getGuid() );
+            $account = new Account();
+            $matteo = $account->RetrieveSingle( $this->account->getGuid() );
             $this->assertTrue( isset( $matteo->name ), "Property name exists" );
             $this->assertEquals( "Matteo Avanzini", $matteo->name, "Name updated" );
         });
 
         $this->specify("Delete account", function() {
-            $delete = $this->user->Delete();
+            $delete = $this->account->Delete();
             $this->assertTrue( $delete, "Account deleted");
         });
 
         $this->specify("Retrieve deleted account", function() {
-            $user = new Account();
-            $deleted = $user->RetrieveSingle( $this->user->getGuid() );
+            $account = new Account();
+            $deleted = $account->RetrieveSingle( $this->account->getGuid() );
             $this->assertNull( $deleted, "Deleted object is null" );
         });
     }
     
-    public function testRetrieveMultiple() {
+    public function testRetrieveMultipleAccounts() {
         $conditions = array( 
-            array("attribute" => "name", "operator" => "Like", "value" => "Camp%")
+            array("attribute" => "name", "operator" => "Like", "value" => "%Rome%")
         );
         $user = new Account();
         $arrayOf = $user->RetrieveMultiple( $conditions );

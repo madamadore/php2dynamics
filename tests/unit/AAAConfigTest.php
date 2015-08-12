@@ -1,6 +1,5 @@
 <?php
 
-
 class ConfigTest extends \Codeception\TestCase\Test
 {
     /**

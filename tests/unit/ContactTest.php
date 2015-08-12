@@ -29,11 +29,11 @@ class ContactTest extends \Codeception\TestCase\Test
     }
 
     // tests
-    public function testCreateContact()
+    public function testCrudContact()
     {
         $this->specify("Create contact", function() {
             $generatedId = $this->user->Create();
-            $this->assertNotEmpty( $generatedId );
+            $this->assertTrue( (boolean) preg_match("/[0-9a-zA-Z]{8}-[0-9a-zA-Z]{4}-[0-9a-zA-Z]{4}-[0-9a-zA-Z]{4}-[0-9a-zA-Z]{12}/", $generatedId ) );
             $this->user->setGuid( $generatedId );
         });
 
@@ -62,7 +62,7 @@ class ContactTest extends \Codeception\TestCase\Test
         });
     }
     
-    public function testRetrieveMultiple() {
+    public function testRetrieveMultipleContacts() {
         $conditions = array( 
             array("attribute" => "firstname", "operator" => "Like", "value" => "Matteo%")
         );

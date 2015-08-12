@@ -155,44 +155,53 @@ class CrmXmlBuilder {
 		return $xml;
 	}
         
-	private function do_query_value($logicalName, $conditions = array(), $columns = "all") {
+        private function do_columns_set($columns) {
+            $xml = '<b:ColumnSet>';
+            if ( "all" == $columns ) {
+                $xml .= '<b:AllColumns>true</b:AllColumns>';
+            } else {
+                $xml .= '<b:Columns xmlns:b="http://schemas.microsoft.com/2003/10/Serialization/Arrays">';
+                foreach ( $columns as $column ) {
+                        $xml .= '<d:string>' . $column . '</d:string>';
+                }
+                $xml .= '</b:Columns>';
+            }
+            $xml .= '</b:ColumnSet>';
+            return $xml;
+        }
+        
+        private function do_criteria( $conditions, $schema ) {
+            $xml = '<b:Criteria>
+                    <b:Filters>
+                      <b:FilterExpression>
+                          <b:Conditions>';
 
+            foreach ( $conditions as $condition ) {
+                      $xml .= '<b:ConditionExpression>
+                          <b:AttributeName>' . $condition[ "attribute" ] . '</b:AttributeName>
+                          <b:Operator>' . $condition[ "operator" ] . '</b:Operator>
+                          <b:Values xmlns:c="http://schemas.microsoft.com/2003/10/Serialization/Arrays">';
+                      $xml .= '<c:anyType i:type="d:string" xmlns:d="http://www.w3.org/2001/XMLSchema">' . $condition[ "value" ] . '</c:anyType>';
+                      $xml .= '</b:Values>
+                      </b:ConditionExpression>';
+              }
+
+              $xml .= '</b:Conditions>
+                      </b:FilterExpression>
+                      </b:Filters>
+                      </b:Criteria>';
+              return $xml;
+        }
+	private function do_query_value($logicalName, $schema, $conditions = array(), $columns = "all") {
+                
 		$xml = '<b:KeyValuePairOfstringanyType>
 		            <c:key>Query</c:key>
                             <c:value i:type="b:QueryExpression">';
 
-		$xml .= '<b:ColumnSet>';
-		if ( "all" == $columns ) {
-                    $xml .= '<b:AllColumns>true</b:AllColumns>';
-		} else {
-                    $xml .= '<b:Columns xmlns:b="http://schemas.microsoft.com/2003/10/Serialization/Arrays">';
-                    foreach ( $columns as $column ) {
-                            $xml .= '<d:string>' . $column . '</d:string>';
-                    }
-                    $xml .= '</b:Columns>';
-		}
-		$xml .= '</b:ColumnSet>';
+                $xml .= $this->do_columns_set($columns);
 
 		if ( ! empty( $conditions ) ) {
-			$xml .= '<b:Criteria>
-	                      <b:Filters>
-                                <b:FilterExpression>
-                                    <b:Conditions>';
-                        
-			foreach ( $conditions as $condition ) {
-				$xml .= '<b:ConditionExpression>
-			            <b:AttributeName>' . $condition[ "attribute" ] . '</b:AttributeName>
-			            <b:Operator>' . $condition[ "operator" ] . '</b:Operator>
-			            <b:Values xmlns:c="http://schemas.microsoft.com/2003/10/Serialization/Arrays">
-			                <c:anyType i:type="d:string" xmlns:d="http://www.w3.org/2001/XMLSchema">' . $condition[ "value" ] . '</c:anyType>
-			            </b:Values>
-                                    </b:ConditionExpression>';
-			}
-
-			$xml .= '</b:Conditions>
-                                </b:FilterExpression>
-                                </b:Filters>
-                                </b:Criteria>';
+                    $xml .= $this->do_criteria( $conditions, $schema );
 		}
 
 		$xml .= '<b:Distinct>false</b:Distinct>
@@ -205,7 +214,7 @@ class CrmXmlBuilder {
 	                <b:PagingCookie i:nil="true" />
 	                <b:ReturnTotalRecordCount>false</b:ReturnTotalRecordCount>
                 </b:PageInfo>
-				<b:NoLock>false</b:NoLock>';
+                <b:NoLock>false</b:NoLock>';
 
 		$xml .= '</c:value>
 		        </b:KeyValuePairOfstringanyType>';
@@ -318,6 +327,19 @@ class CrmXmlBuilder {
             return $xml;
         }
 
+        private function getAttributeType($attribute, $schema) {
+            foreach ( $schema as $key=>$typeOrArray ) {
+                if ( $attribute == $key ) {
+                    $type = $typeOrArray;
+                    if ( is_array( $typeOrArray ) )  {
+                        $type = $typeOrArray[ "type" ];
+                    }
+                    return $type;
+                }
+            }
+            return false;
+        }
+        
 	private function fetchEntityFields($object, $schema) {
 
                 $xml = "";
@@ -380,7 +402,7 @@ class CrmXmlBuilder {
 		switch ($requestName) {
 			case "Retrieve":
 			case "RetrieveMultiple":
-				$xml .= $this->do_query_value($entity->getLogicalName(), $conditions, $columns);
+				$xml .= $this->do_query_value($entity->getLogicalName(), $entity->getSchema(), $conditions, $columns);
 				break;
 			case "SetState":
 				$xml .= $this->do_entityreference_value( 'EntityMoniker', $guid, $entity->getLogicalName() );
