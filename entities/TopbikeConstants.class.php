@@ -10,6 +10,11 @@ class TopBikeConstants {
         "ES" => "108600004" 
     );
     
+    public static $_GENDER = array(
+        "Male" => "108600000",
+        "Female" => "108600001"
+    );
+    
     public static $_SERVICE_TYPE = array( 
         "scheduled_tour" => "108600000", 
         "private_tour" => "108600001", 
@@ -25,7 +30,7 @@ class TopBikeConstants {
     );
     
     public static $_SERVICE_ID = array( 
-        "Rental" => "74356ab9-1244-e111-90b4-1cc1de6d3b23", 
+        "Rental" => "74356AB9-1244-E111-90b4-1CC1DE6D3B23", 
         "Tour" => "1D3E19B5-EFDA-E111-B52D-D4856451DC79" 
     );
 

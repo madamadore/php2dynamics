@@ -21,7 +21,6 @@ class ProductTest extends \Codeception\TestCase\Test
     
     public function testRetrieveSingleProduct() {
         $obj = new Product();
-        //$product = $obj->RetrieveSingle( "F5AF0C79-97DB-4C3F-8D7E-62B53D9062D4" );
         $product = $obj->RetrieveSingle( "1A0A4660-AD48-E411-A81A-D89D67638EE8" );
         $this->assertEquals( $product->name, "City Center Summer" );
         $this->assertEquals( $product->tb_servicetype, TopBikeConstants::$_SERVICE_TYPE["scheduled_tour"] );

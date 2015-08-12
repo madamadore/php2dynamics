@@ -123,12 +123,17 @@ class DynamicsIntegrator
             $xmlbuilder = new CrmXmlBuilder( DynamicsIntegrator::$organizationServiceURL, DynamicsIntegrator::$securityData );
             $envelope = $xmlbuilder->createXml( $entity, $requestName, $guid, $conditions, $columns );
             
+            if ($entity->getLogicalName() == "serviceappointment" && $requestName == "Create" )
+                fwrite( STDERR, print_r( $envelope, TRUE ) );
             if ($_DEBUG_MODE) {
                 $this->displayXml( $envelope );
             }
                 
             $response =  LiveIDManager::GetSOAPResponse("/Organization.svc", $domainname, DynamicsIntegrator::$organizationServiceURL, $envelope);
 
+            if ($entity->getLogicalName() == "serviceappointment" && $requestName == "Create" )
+                fwrite( STDERR, print_r( $response, TRUE ) );
+            
             if ( $_DEBUG_MODE ) {
                 $this->displayXml( $response );
             }
