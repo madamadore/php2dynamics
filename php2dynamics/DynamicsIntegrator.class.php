@@ -61,7 +61,7 @@ class DynamicsIntegrator
 		return self::$securityData;
 	}
 
-	private function setState( $state, $status, $guid, $logicalName ) {
+	private function doStateRequest( $state, $status, $guid, $logicalName ) {
 
 		$head = EntityUtils::getCRMSoapHeader(self::$organizationServiceURL, self::$securityData);
 		$xml = '<s:Body>
@@ -79,13 +79,13 @@ class DynamicsIntegrator
                			<a:KeyValuePairOfstringanyType>
                				<c:key>State</c:key>
                				<c:value i:type="a:OptionSetValue">
-               					<a:Value>' . DynamicsIntegrator::$_STATE[ $state ] . '</a:Value>
+               					<a:Value>' . $state . '</a:Value>
                				</c:value>
                			</a:KeyValuePairOfstringanyType>
                			<a:KeyValuePairOfstringanyType>
                				<c:key>Status</c:key>
                				<c:value i:type="a:OptionSetValue">
-               					<a:Value>' . DynamicsIntegrator::$_STATUS[ $status ] . '</a:Value>
+               					<a:Value>' . $status . '</a:Value>
                				</c:value>
                			</a:KeyValuePairOfstringanyType>
                			</a:Parameters>
