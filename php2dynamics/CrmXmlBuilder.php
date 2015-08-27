@@ -383,8 +383,6 @@ class CrmXmlBuilder {
 	 */
 	public function createXml($entity, $requestName = "Create", $guid = "00000000-0000-0000-0000-000000000000", $conditions = array(), $columns = "all") {
 
-		global $_DEBUG_MODE;
-
 		$head = $this->getRequestHeaders();
 		$body = $this->getRequestBody( $entity, $requestName, $guid, $conditions, $columns );
 

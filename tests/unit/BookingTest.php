@@ -12,6 +12,7 @@ class BookingTest extends \Codeception\TestCase\Test
     protected $tester;
     protected $tour;
     protected $bikerent;
+    protected $privatetour;
     
     protected function _before()
     {   
@@ -19,13 +20,14 @@ class BookingTest extends \Codeception\TestCase\Test
 
         $booking->description = "This is a test booking";
         $booking->regardingobjectid = "47f0189b-1bba-e111-b50b-d4856451dc79"; // Rimmer Lankaster
-        $booking->tb_productid = "1A0A4660-AD48-E411-A81A-D89D67638EE8";   // City Center Summer
-        $booking->tb_tourid = "33600DC8-6221-E311-A9F0-D48564531939"; // City Center
+        $booking->tb_tourid = "33600DC8-6221-E311-A9F0-D48564531939"; // Appointement 
         $booking->serviceid = TopBikeConstants::$_SERVICE_ID[ "Tour" ];
+        /*
         $booking->resources = array ( 
                     array( "guid" => "CD91053B-9DA8-E411-80D7-FC15B4280CB8", 
                            "logicalName"=>"tb_bike" ) 
         );
+         * */
         $booking->scheduledstart = "2000-01-01T10:00:00";
         $booking->scheduledend = "2000-01-01T14:00:00";
         $booking->servicetype = TopBikeConstants::$_SERVICE_TYPE[ "scheduled_tour" ];
@@ -40,11 +42,27 @@ class BookingTest extends \Codeception\TestCase\Test
         $booking->tb_totalamount = 100;
         $booking->tb_materialdetails = "test notes";
         $booking->subject = "Test Summer City Booking";
-        // $booking->tb_topbikerevenue => 100;
-        // $booking->tb_tourprice = 100;
-        // $booking->tb_productid = "1A0A4660-AD48-E411-A81A-D89D67638EE8";   // City Center Summer
-        // $booking->tb_bookingcode = "string",
         $this->tour = $booking;
+
+        $pt = new Booking();
+        $pt->description = "This is a test booking";
+        $pt->regardingobjectid = "47f0189b-1bba-e111-b50b-d4856451dc79"; // Rimmer Lankaster
+        $pt->tb_productid = "1A0A4660-AD48-E411-A81A-D89D67638EE8";   // City Center Summer
+        $pt->serviceid = TopBikeConstants::$_SERVICE_ID[ "Tour" ];
+        $pt->scheduledstart = "2000-03-01T09:00:00";
+        $pt->scheduledend = "2000-03-01T10:00:00";
+        $pt->servicetype = TopBikeConstants::$_SERVICE_TYPE[ "private_tour" ];
+        $pt->tb_bookingtype = TopBikeConstants::$_BOOKING_TYPE[ "Web" ];
+        $pt->tb_language = TopBikeConstants::$_LANGUAGE[ "DE" ];
+        $pt->tb_participants = 1;
+        $pt->tb_bookingdate = "2010-08-10T19:34:58";
+        $pt->tb_scheduledbikes = 0;
+        $pt->tb_deposit = 20;
+        $pt->tb_openamount = 80;
+        $pt->tb_totalamount = 100;
+        $pt->tb_materialdetails = "test notes";
+        $pt->subject = "Private tour test";
+        $this->privatetour = $pt;
     }
 
     protected function _after()
@@ -52,9 +70,17 @@ class BookingTest extends \Codeception\TestCase\Test
     }
     
     public function testCrudBooking() {
-        fwrite(STDERR, print_r( $this->tour, TRUE ));
-        $bookingId = $this->tour->Create();
-        $this->assertEquals( $bookingId, "This is it!" );
+        fwrite(STDERR, print_r( $this->privatetour, TRUE ));
+        $generatedId = $this->privatetour->Create();
+        $this->assertTrue( (boolean) preg_match("/[0-9a-zA-Z]{8}-[0-9a-zA-Z]{4}-[0-9a-zA-Z]{4}-[0-9a-zA-Z]{4}-[0-9a-zA-Z]{12}/", $generatedId ) );
+        $this->privatetour->setGuid( $generatedId );
+        $this->privatetour->Delete();
+        
+        $generatedId = $this->tour->Create();
+        //$this->assertEquals( $generatedId, "This is it!" );
+        $this->assertTrue( (boolean) preg_match("/[0-9a-zA-Z]{8}-[0-9a-zA-Z]{4}-[0-9a-zA-Z]{4}-[0-9a-zA-Z]{4}-[0-9a-zA-Z]{12}/", $generatedId ) );
+        $this->tour->setGuid( $generatedId );
+        $this->tour->Delete();
     }
     
     public function testRetrieveSingleBooking() {

@@ -30,7 +30,7 @@ class TopBikeConstants {
     );
     
     public static $_SERVICE_ID = array( 
-        "Rental" => "74356AB9-1244-E111-90b4-1CC1DE6D3B23", 
+        "Rental" => "74356AB9-1244-E111-90B4-1CC1DE6D3B23", 
         "Tour" => "1D3E19B5-EFDA-E111-B52D-D4856451DC79" 
     );
 
