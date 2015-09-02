@@ -61,4 +61,21 @@ class TopBikeConstants {
         "Inactive/Former Equipment" => "108600002",
         "Accessory" => "108600003"
     );
+    
+    public static $_STATE = array(  // status
+        "Open" => "0", 
+        "Closed" => "1", 
+        "Canceled" => "2", 
+        "Scheduled" => "3" 
+    );
+    
+    public static $_STATUS = array( // status reason
+        "Tentative" => "2", 
+        "Awaiting Deposit" => "1", 
+        "Completed" => "8",
+        "Canceled" => "9", 
+        "Confirmed" => "4", 
+        "In Progress" => "6", 
+        "No Show" => "10" 
+    );
 }

@@ -1,7 +1,5 @@
 <?php
 
-Codeception\Specify\Config::setIgnoredProperties(['user']);
-
 class BikeTest extends \Codeception\TestCase\Test
 {
     use \Codeception\Specify;
@@ -34,4 +32,5 @@ class BikeTest extends \Codeception\TestCase\Test
         $arrayOf = $obj->RetrieveMultiple( $conditions );
         $this->assertTrue( is_array($arrayOf) && count($arrayOf) > 0, "Multiple retrieve returns multiple bikes" );
     }
+
 }

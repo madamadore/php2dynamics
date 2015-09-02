@@ -1,7 +1,7 @@
 <?php
 require_once dirname(__FILE__) . "/../php2dynamics/ReadOnlyEntity.class.php";
 
-class Product extends ReadOnlyEntity {
+class Tour extends ReadOnlyEntity {
     
     public function getLogicalName() {
         return "product";
@@ -24,6 +24,7 @@ class Product extends ReadOnlyEntity {
             "tb_sitesvisited" => "string",
             "tb_startingpoint" => "string",
             "tb_summary" => "string",
+            "tb_languages" => "option",
         );
     }
     

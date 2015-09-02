@@ -1,7 +1,5 @@
 <?php
 
-Codeception\Specify\Config::setIgnoredProperties(['user']);
-
 class AppointmentTest extends \Codeception\TestCase\Test
 {
     use \Codeception\Specify;

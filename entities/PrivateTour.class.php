@@ -1,7 +1,7 @@
 <?php
-require_once dirname(__FILE__) . "/../php2dynamics/Entity.class.php";
+require_once dirname(__FILE__) . "/Booking.class.php";
 
-class Booking extends Entity {
+class PrivateTour extends Booking {
 
     var $avaibility_offline = false;
     var $integration_status = false;
@@ -30,9 +30,6 @@ class Booking extends Entity {
             "tb_deposit" => "money",
             "tb_language" => "option",
             "tb_materialdetails" => "string",
-            "tb_commission" => "money",
-            "tb_balance" => "money",
-            "tb_topbikerevenue" => "money",
             "tb_openamount" => "money",
             "tb_participants" => "int",
             "tb_servicetype" => "option",
@@ -52,5 +49,9 @@ class Booking extends Entity {
 
     public function __construct($subject = "") {
         $this->subject = $subject;
+        $this->serviceid = TopBikeConstants::$_SERVICE_ID[ "Tour" ];
+        $this->tb_servicetype = TopBikeConstants::$_SERVICE_TYPE[ "private_tour" ];
+        $this->tb_bookingtype = TopBikeConstants::$_BOOKING_TYPE[ "Web" ];
     }
+    
 }

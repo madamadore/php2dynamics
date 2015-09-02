@@ -27,5 +27,5 @@ class Bike extends ReadOnlyEntity {
     public function getPrimaryKey() {
         return "tb_bikeid";
     }
-    
+
 }

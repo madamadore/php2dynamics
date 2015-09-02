@@ -13,7 +13,6 @@ require_once(dirname(__FILE__) . '/CrmXmlReader.php');
  */
 class DynamicsIntegrator
 {
-        
  	private static $liveIDUsername;
 	private static $liveIDPassword;
 	private static $organizationServiceURL;
@@ -132,6 +131,62 @@ class DynamicsIntegrator
                 $this->displayXml( $response );
             }
             
+            return $response;
+	}
+
+	/**
+	 * @param   resources   array of GUID
+	 */
+	public function doAvaibilityRequest($resources, $start_date, $start_time, $end_date, $end_time, $gap = "1 hour")
+	{
+		$domainname = substr(self::$organizationServiceURL,8,-1);
+		$pos = strpos($domainname, "/");
+		$domainname = substr($domainname,0,$pos);
+
+		$st = new DateTime( $start_time );
+		$st->modify( '-' . $gap );
+		$start_time = $st->format( 'H:i:s' );
+
+		$et = new DateTime( $end_time );
+		$et->modify( '+' . $gap );
+		$end_time = $et->format( 'H:i:s' );
+
+		$head = EntityUtils::getCRMSoapHeader(self::$organizationServiceURL, self::$securityData);
+		$request = '<s:Body>
+                <Execute xmlns="http://schemas.microsoft.com/xrm/2011/Contracts/Services" xmlns:i="http://www.w3.org/2001/XMLSchema-instance">
+                <request i:type="b:QueryMultipleSchedulesRequest" xmlns:a="http://schemas.microsoft.com/xrm/2011/Contracts" xmlns:b="http://schemas.microsoft.com/crm/2011/Contracts">
+                    <a:Parameters xmlns:c="http://schemas.datacontract.org/2004/07/System.Collections.Generic">
+                        <a:KeyValuePairOfstringanyType>
+                            <c:key>ResourceIds</c:key>
+                            <c:value i:type="d:ArrayOfguid" xmlns:d="http://schemas.microsoft.com/2003/10/Serialization/Arrays">';
+		foreach ($resources as $resource)
+			$request .= '<d:guid>'.$resource.'</d:guid>';
+		$request .= '</c:value>
+                        </a:KeyValuePairOfstringanyType>
+                        <a:KeyValuePairOfstringanyType>
+                            <c:key>Start</c:key>
+                            <c:value i:type="d:dateTime" xmlns:d="http://www.w3.org/2001/XMLSchema">'.$start_date.'T'.$start_time.'Z</c:value>
+                        </a:KeyValuePairOfstringanyType>
+                        <a:KeyValuePairOfstringanyType>
+                            <c:key>End</c:key>
+                            <c:value i:type="d:dateTime" xmlns:d="http://www.w3.org/2001/XMLSchema">'.$end_date.'T'.$end_time.'Z</c:value>
+                        </a:KeyValuePairOfstringanyType>
+                        <a:KeyValuePairOfstringanyType>
+                            <c:key>TimeCodes</c:key>
+                            <c:value i:type="d:ArrayOfTimeCode" xmlns:d="http://schemas.microsoft.com/2003/10/Serialization/Arrays">
+                                <d:TimeCode>Available</d:TimeCode>
+                            </c:value>
+                        </a:KeyValuePairOfstringanyType>
+                    </a:Parameters>
+                    <a:RequestId i:nil="true" />
+                    <a:RequestName>QueryMultipleSchedules</a:RequestName>
+                </request>
+                </Execute>
+            </s:Body>
+            </s:Envelope>';
+
+            $response =  LiveIDManager::GetSOAPResponse("/Organization.svc", $domainname, self::$organizationServiceURL, $head.$request);
+
             return $response;
 	}
         

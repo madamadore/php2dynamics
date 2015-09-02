@@ -1,7 +1,7 @@
 <?php
 require_once dirname(__FILE__) . "/../php2dynamics/Entity.class.php";
 
-class Contact extends Entity {
+class Customer extends Entity {
         
     public function getSchema() {
         return array(
