@@ -1,5 +1,5 @@
 {
-    "username" : "<your username>",
+    "username" : "<your name>",
     "password" : "<your password>",
     "url" : "https://<your url>/XRMServices/2011/Organization.svc"
 }

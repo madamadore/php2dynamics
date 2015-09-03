@@ -1,12 +1,6 @@
 <?php
-require_once(dirname(__FILE__) . '/DynamicsIntegrator.class.php');
-require_once(dirname(__FILE__) . '/ResponseEnvelope.class.php');
 
 abstract class Entity {
-
-        public static $_STATE = array( "Open" => "0", "Closed" => "1", "Canceled" => "2", "Scheduled" => "3" );
-	public static $_STATUS = array( "Tentative" => "2", "Awaiting Deposit" => "1", "Completed" => "8",
-	                                "Canceled" => "9", "Confirmed" => "4", "In Progress" => "6", "No Show" => "10" );
         
 	protected $guid = "00000000-0000-0000-0000-000000000000";
         protected $state;
@@ -27,21 +21,10 @@ abstract class Entity {
          */
         public abstract function getPrimaryKey();
         
-        /**
-         * @return schema of fileds as array 
-         */
-        public abstract function getSchema();
-        
-        /**
-         * @return logical name of this entity
-         */
-        public abstract function getLogicalName();
-        
         protected function UpdateState() {
             $integrator = DynamicsIntegrator::getInstance();
             
-            $response = $integrator->doStateRequest( Entity::$_STATE[$this->state], 
-                                                     Entity::$_STATUS[$this->status],
+            $response = $integrator->doStateRequest( $this->getState(), $this->getStatus(),
                                                     $this->getGuid(), $this->getLogicalName() );
             $r = new ResponseEnvelope($response);
         
@@ -96,6 +79,16 @@ abstract class Entity {
             }
             return $r->getErrorMessage();
         }
+        
+        /**
+         * @return schema of fileds as array 
+         */
+        public abstract function getSchema();
+        
+        /**
+         * @return logical name of this entity
+         */
+        public abstract function getLogicalName();
         
         /**
          * Retrieve multiple instances of current Entity.
@@ -156,5 +149,5 @@ abstract class Entity {
             
             return $objects;
         }
-        
+
 }
