@@ -9,9 +9,9 @@ MS Dynamics database looking in Entities System View panel.
 
 # Getting started:
 
-1) Fork php2dynamics folder into your library workspace 
-2) Edit php2dynamics/config.json file and insert your own username, password and url.
-3) Start create your own classes, by extend Entity class from php2dynamics/Entity.class.php.
+1. Fork php2dynamics folder into your library workspace 
+2. Edit php2dynamics/config.json file and insert your own username, password and url.
+3. Start create your own classes, by extend Entity class from php2dynamics/Entity.class.php.
 
 If you need some example you can found it in "entities" folder.
 
