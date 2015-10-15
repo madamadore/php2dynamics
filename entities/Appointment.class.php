@@ -19,6 +19,7 @@ class Appointment extends ReadOnlyEntity {
             "location" => "string",
             "tb_tourprice" => "money",
             "tb_tourprice_base" => "money",
+            "createdon" => "datetime",
             "scheduledstart" => "datetime",
             "scheduledend" => "datetime",
             "statecode" => "string",
