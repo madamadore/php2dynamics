@@ -13,7 +13,6 @@ class TourBooking extends Booking {
     public function getSchema() {
 	return array(
             "description" => "string",
-            "duration" => "int",
             "regardingobjectid" => array ( "type"=>"guid", "logicalName"=>"contact" ),
             "resources" => array ( "type"=>"guid_array", "logicalName"=>"equipment" ),
             "scheduledstart" => "datetime",
@@ -39,7 +38,12 @@ class TourBooking extends Booking {
             "tb_scheduledbikes" => "float",
             "tb_totalamount" => "money",
             "tb_topbikerevenue" => "money",
-            "tb_tourprice" => "money"
+            "tb_tourprice" => "money",
+            "tb_children" => "float",
+            "tb_childamount" => "money",
+            "tb_ebikeamount" => "money",
+            "tb_child_seats" => "float",
+            "tb_ebikes_number" => "float"
         );
     }
     

@@ -5,17 +5,33 @@ require_once(dirname(__FILE__) . '/ResponseEnvelope.class.php');
 abstract class ReadOnlyEntity {
     
         protected $guid = "00000000-0000-0000-0000-000000000000";
-        protected $state;
-	protected $status;
-	
+        
         public function setGuid($guid) { $this->guid = $guid; }
         public function getGuid() { return $this->guid; }
         
-        public function setState($state) { $this->state = $state; }
-        public function getState() { return $this->state; }
+        protected $statecode;
+	protected $statuscode;
+	
+        public function setState($state) { $this->statecode = $state; }
+        public function getState() { return $this->statecode; }
         
-        public function setStatus($status) { $this->status = $status; }
-        public function getStatus() { return $this->status; }
+        public function setStatus($status) { $this->statuscode = $status; }
+        public function getStatus() { return $this->statuscode; }
+        
+        protected function UpdateState() {
+            $integrator = DynamicsIntegrator::getInstance();
+            
+            $response = $integrator->doStateRequest( $this->getState(), $this->getStatus(),
+                                                    $this->getGuid(), $this->getLogicalName() );
+            $r = new ResponseEnvelope($response);
+        
+            if ( $r->isSuccess() ) {
+                return true;
+            }
+            
+            return $r->getErrorMessage();
+        }
+        
         /**
          * WARNING: Multiple keys are not implemented in this version.
          *

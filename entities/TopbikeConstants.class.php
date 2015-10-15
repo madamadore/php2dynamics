@@ -7,7 +7,13 @@ class TopBikeConstants {
         "NL" => "108600001", 
         "DE" => "108600002", 
         "IT" => "108600003", 
-        "ES" => "108600004" 
+        "ES" => "108600004",
+        "FR" => "108600005"
+    );
+    
+    public static $_SEASON_TYPE = array(
+        "Low" => "108600000",
+        "High" => "108600001"
     );
     
     public static $_GENDER = array(
@@ -32,6 +38,13 @@ class TopBikeConstants {
     public static $_SERVICE_ID = array( 
         "Rental" => "74356AB9-1244-E111-90B4-1CC1DE6D3B23", 
         "Tour" => "1D3E19B5-EFDA-E111-B52D-D4856451DC79" 
+    );
+    
+    public static $_TOUR_TYPE = array(
+        "Inside Rome" => "108600000", 
+        "Outside Rome" => "108600001",
+        "Bike" => "108600002",
+        "Accessory" => "108600003"
     );
 
     public static $_BOOKING_TYPE = array( 
@@ -77,5 +90,12 @@ class TopBikeConstants {
         "Confirmed" => "4", 
         "In Progress" => "6", 
         "No Show" => "10" 
+    );
+    
+    public static $_CHILDSEAT_AVAILABILITY = array( 
+        "No" => "108600000", 
+        "Only Back" => "108600001",
+        "Only Front" => "108600002",
+        "Back and Front" => "108600003"
     );
 }

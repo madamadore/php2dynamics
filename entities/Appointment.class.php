@@ -21,11 +21,17 @@ class Appointment extends ReadOnlyEntity {
             "tb_tourprice_base" => "money",
             "scheduledstart" => "datetime",
             "scheduledend" => "datetime",
+            "statecode" => "string",
+            "statuscode" => "string",
             "category" => "string",
             "activityid" => "string",
             "tb_officeid" => array ( "type"=>"guid", "logicalName"=>"site" ),
             "tb_requiredtl" => "int",
-            "tb_phototaken" => "option"
+            "tb_phototaken" => "option",
+            "tb_ask_ebike" => "option",
+            "tb_ebike_default_value" => "option",
+            "tb_ebike_fee" => "money",
+            "tb_child_discount" => "float"
         );
     }
     

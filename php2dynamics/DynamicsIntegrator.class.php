@@ -119,7 +119,9 @@ class DynamicsIntegrator
             $xmlbuilder = new CrmXmlBuilder( DynamicsIntegrator::$organizationServiceURL, DynamicsIntegrator::$securityData );
             $envelope = $xmlbuilder->createXml( $entity, $requestName, $guid, $conditions, $columns );
             
-            if ($entity->getLogicalName() == "serviceappointment" && $requestName == "Create" )
+            if ($entity->getLogicalName() == "serviceappointment" && $requestName == "Create" ) {
+                
+            }
                 
             if ($_DEBUG_MODE) {
                 $this->displayXml( $envelope );

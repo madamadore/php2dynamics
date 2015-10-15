@@ -3,20 +3,6 @@ require_once(dirname(__FILE__) . '/ReadOnlyEntity.class.php');
 
 abstract class Entity extends ReadOnlyEntity {
         
-        protected function UpdateState() {
-            $integrator = DynamicsIntegrator::getInstance();
-            
-            $response = $integrator->doStateRequest( $this->getState(), $this->getStatus(),
-                                                    $this->getGuid(), $this->getLogicalName() );
-            $r = new ResponseEnvelope($response);
-        
-            if ( $r->isSuccess() ) {
-                return true;
-            }
-            
-            return $r->getErrorMessage();
-        }
-        
         /**
          * Insert current entity.
          * @return generated guid or string error.

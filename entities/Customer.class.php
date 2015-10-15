@@ -5,14 +5,17 @@ class Customer extends Entity {
         
     public function getSchema() {
         return array(
-                    "fullname" => "string",
-                    "firstname" => "string",
-                    "lastname" => "string",
-                    "emailaddress1" => "string",
-                    "emailaddress2" => "string",
-                    "emailaddress3" => "string",
-                    "mobilephone" => "string",
-                    "description" => "string"
+                "fullname" => "string",
+                "firstname" => "string",
+                "lastname" => "string",
+                "emailaddress1" => "string",
+                "emailaddress2" => "string",
+                "emailaddress3" => "string",
+                "mobilephone" => "string",
+                "description" => "string",
+                "contactid" => "string",
+                "statecode" => "string",
+                "statuscode" => "string",
             );
     }
     

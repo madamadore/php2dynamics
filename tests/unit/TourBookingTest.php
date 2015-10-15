@@ -29,9 +29,9 @@ class TourBookingTest extends \Codeception\TestCase\Test
         $booking->tb_deposit = 20;
         $booking->tb_openamount = 80;
         $booking->tb_totalamount = 100;
-        $pt->tb_commission = 0;
-        $pt->tb_topbikerevenue = $pt->tb_totalamount - $pt->tb_commission;
-        $pt->tb_balance = $pt->tb_topbikerevenue;
+        $booking->tb_commission = 0;
+        $booking->tb_topbikerevenue = $booking->tb_totalamount - $booking->tb_commission;
+        $booking->tb_balance = $booking->tb_topbikerevenue;
         $booking->tb_materialdetails = "test notes";
         $booking->subject = "Test Summer City Booking";
         $this->tour = $booking;

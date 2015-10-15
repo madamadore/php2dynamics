@@ -12,11 +12,15 @@ class Equipment extends ReadOnlyEntity {
             "tb_id" => "string",
             "description" => "string",
             "equipmentid" => "string",
+            "emailaddress" => "string",
             "name" => "string",
+            "tb_children" => "float",
             "siteid" => array ( "type"=>"guid", "logicalName"=>"site" ),
-            "tb_productid" => array ( "type"=>"guid", "logicalName"=>"product" ),
+            "tb_productid" => array ( "type"=>"guid", "logicalName"=>"product" ), // product group name
             "tb_type" => "option",
+            "tb_bikerecordid" => array ( "type"=>"guid", "logicalName"=>"tb_bike" ), 
             "tb_primarylanguage" => "option",
+            "tb_productid" => array ( "type"=>"guid", "logicalName"=>"product" )  
         );
     }
     

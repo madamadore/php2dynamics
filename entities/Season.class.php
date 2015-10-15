@@ -1,27 +1,26 @@
 <?php
 require_once dirname(__FILE__) . "/../php2dynamics/ReadOnlyEntity.class.php";
 
-class PriceList extends ReadOnlyEntity {
+class Season extends ReadOnlyEntity {
     
     public function getLogicalName() {
-        return "pricelevel";
+        return "tb_season";
     }
     
     public function getSchema() {
         return array(
-            "name" => "string",
-            "description" => "string",
-            "begindate" => "datetime",
-            "enddate" => "datetime",
-            "tb_language" => "option",
-            "pricelevelid" => "string",
+            "tb_name" => "string",
+            "tb_start_date" => "datetime",
+            "tb_end_date" => "datetime",
+            "tb_season_type" => "option",
             "statecode" => "string",
             "statuscode" => "string",
+            "tb_seasonid"=> "string"
         );
     }
     
     public function getPrimaryKey() {
-        return "pricelevelid";
+        return "tb_seasonid";
     }
 
 }

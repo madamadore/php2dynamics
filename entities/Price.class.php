@@ -17,6 +17,8 @@ class Price extends ReadOnlyEntity {
             "tb_priceid" => "string",
             "tb_pricelistid" => array ( "type"=>"guid", "logicalName"=>"pricelevel" ),
             "tb_productid" => array ( "type"=>"guid", "logicalName"=>"product" ),
+            "statecode" => "string",
+            "statuscode" => "string",
         );
     }
     

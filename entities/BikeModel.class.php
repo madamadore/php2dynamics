@@ -7,6 +7,8 @@ class BikeModel extends ReadOnlyEntity {
     
     public function getSchema() {
         return array(
+            "statecode" => "string",
+            "statuscode" => "string",
             "tb_bikemodelid" => "string",
             "tb_brand" => "option",
             "tb_name" => "string",
@@ -14,7 +16,9 @@ class BikeModel extends ReadOnlyEntity {
             "tb_price" => "money",
             "tb_productgroupid" => array ( "type"=>"guid", "logicalName"=>"product" ),
             "tb_productid" => array ( "type"=>"guid", "logicalName"=>"product" ),
-            "tb_siteid" => array ( "type"=>"guid", "logicalName"=>"site" )
+            "tb_siteid" => array ( "type"=>"guid", "logicalName"=>"site" ),
+            "tb_childseat_availability" => "option",
+            "tb_rental_availability" => "option"
         );
     }
     

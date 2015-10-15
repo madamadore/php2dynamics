@@ -9,6 +9,8 @@ class Bike extends ReadOnlyEntity {
     
     public function getSchema() {
         return array(
+            "statecode" => "string",
+            "statuscode" => "string",
             "tb_bikeid" => "string",
             "tb_comments" => "string",
             "tb_equipmentrecordid" => array ( "type"=>"guid", "logicalName"=>"equipment" ),
