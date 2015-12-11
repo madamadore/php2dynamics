@@ -50,35 +50,35 @@ class EquipmentTest extends \Codeception\TestCase\Test
 	$end_date = "2000-02-02T11:00:00";
 	$avaibility = $obj->checkAvaibility($resources, $start_date, $end_date, "0 hour");
         // fwrite(STDERR, print_r( $avaibility, TRUE ));
-        $this->assertEquals( true, $avaibility["B6099712-571D-E311-AF02-3C4A92DBD80A"]["avaibility"] );
+        $this->assertEquals( true, $avaibility["B6099712-571D-E311-AF02-3C4A92DBD80A"]["availability"] );
 
 	$start_date = "2000-02-01T12:00:00";
 	$end_date = "2000-02-06T12:00:00";
 	$avaibility = $obj->checkAvaibility( $resources, $start_date, $end_date, "0 hour" );
-	$this->assertEquals( true, $avaibility["B6099712-571D-E311-AF02-3C4A92DBD80A"]["avaibility"] );
-        $this->assertEquals( true, $avaibility["FE089712-571D-E311-AF02-3C4A92DBD80A"]["avaibility"] );
-        $this->assertEquals( true, $avaibility["F2089712-571D-E311-AF02-3C4A92DBD80A"]["avaibility"] );
+	$this->assertEquals( true, $avaibility["B6099712-571D-E311-AF02-3C4A92DBD80A"]["availability"] );
+        $this->assertEquals( true, $avaibility["FE089712-571D-E311-AF02-3C4A92DBD80A"]["availability"] );
+        $this->assertEquals( true, $avaibility["F2089712-571D-E311-AF02-3C4A92DBD80A"]["availability"] );
 
 	$start_date = "2000-03-01T14:00:00";
 	$end_date = "2000-03-01T15:00:00";
 	$avaibility = $obj->checkAvaibility( $resources, $start_date, $end_date, "0 hour" );
-	$this->assertEquals( true, $avaibility["B6099712-571D-E311-AF02-3C4A92DBD80A"]["avaibility"] );
-        $this->assertEquals( true, $avaibility["FE089712-571D-E311-AF02-3C4A92DBD80A"]["avaibility"] );
-        $this->assertEquals( true, $avaibility["F2089712-571D-E311-AF02-3C4A92DBD80A"]["avaibility"] );
+	$this->assertEquals( true, $avaibility["B6099712-571D-E311-AF02-3C4A92DBD80A"]["availability"] );
+        $this->assertEquals( true, $avaibility["FE089712-571D-E311-AF02-3C4A92DBD80A"]["availability"] );
+        $this->assertEquals( true, $avaibility["F2089712-571D-E311-AF02-3C4A92DBD80A"]["availability"] );
 
 	$start_date = "2000-02-01T09:00:00";
 	$end_date = "2000-02-01T09:30:00";
 	$avaibility = $obj->checkAvaibility( $resources, $start_date, $end_date, "0 hour" );
-	$this->assertEquals( true, $avaibility["B6099712-571D-E311-AF02-3C4A92DBD80A"]["avaibility"] );
-        $this->assertEquals( true, $avaibility["FE089712-571D-E311-AF02-3C4A92DBD80A"]["avaibility"] );
-        $this->assertEquals( true, $avaibility["F2089712-571D-E311-AF02-3C4A92DBD80A"]["avaibility"] );
+	$this->assertEquals( true, $avaibility["B6099712-571D-E311-AF02-3C4A92DBD80A"]["availability"] );
+        $this->assertEquals( true, $avaibility["FE089712-571D-E311-AF02-3C4A92DBD80A"]["availability"] );
+        $this->assertEquals( true, $avaibility["F2089712-571D-E311-AF02-3C4A92DBD80A"]["availability"] );
 
 	$start_date = "2000-02-08T09:00:00";
 	$end_date = "2000-02-15T18:00:00";
 	$avaibility = $obj->checkAvaibility( $resources, $start_date, $end_date, "0 hour" );
-	$this->assertEquals( true, $avaibility["B6099712-571D-E311-AF02-3C4A92DBD80A"]["avaibility"] );
-        $this->assertEquals( true, $avaibility["FE089712-571D-E311-AF02-3C4A92DBD80A"]["avaibility"] );
-	$this->assertEquals( false, $avaibility["F2089712-571D-E311-AF02-3C4A92DBD80A"]["avaibility"] );
+	$this->assertEquals( true, $avaibility["B6099712-571D-E311-AF02-3C4A92DBD80A"]["availability"] );
+        $this->assertEquals( true, $avaibility["FE089712-571D-E311-AF02-3C4A92DBD80A"]["availability"] );
+	$this->assertEquals( false, $avaibility["F2089712-571D-E311-AF02-3C4A92DBD80A"]["availability"] );
 
     }
 }

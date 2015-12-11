@@ -76,6 +76,9 @@ class Database {
     private function getSingleColumnCreate($name, $type, $default = "DEFAULT NULL") {
         $sqlType = null;
         switch ($type) {
+            case "boolean":
+                $sqlType = "TINYINT(1)";
+                break;
             case "datetime":
                 $sqlType = "TIMESTAMP";
                 $default = "NOT NULL";
