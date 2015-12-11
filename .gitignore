@@ -1,1 +1,5 @@
 output.sql
+app/console.php
+codecept.phar
+codeception.yml
+tests/

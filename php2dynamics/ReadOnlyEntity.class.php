@@ -18,7 +18,7 @@ abstract class ReadOnlyEntity {
         public function setStatus($status) { $this->statuscode = $status; }
         public function getStatus() { return $this->statuscode; }
         
-        protected function UpdateState() {
+        public function UpdateState() {
             $integrator = DynamicsIntegrator::getInstance();
             
             $response = $integrator->doStateRequest( $this->getState(), $this->getStatus(),
