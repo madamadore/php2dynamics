@@ -42,7 +42,14 @@ class Booking extends Entity {
             "tb_scheduledbikes" => "float",
             "tb_totalamount" => "money",
             "tb_topbikerevenue" => "money",
-            "tb_tourprice" => "money"
+            "tb_tourprice" => "money",
+            "tb_women" => "float",
+            "tb_men" => "float",
+            "tb_children" => "float",
+            "tb_child_seats" => "float",
+            "tb_ebikes_number" => "float",
+            "description" => "string",
+            "tb_creditcardrequirednew" => "option"
         );
     }
     

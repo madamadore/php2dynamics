@@ -32,7 +32,8 @@ class Appointment extends ReadOnlyEntity {
             "tb_ask_ebike" => "option",
             "tb_ebike_default_value" => "option",
             "tb_ebike_fee" => "money",
-            "tb_child_discount" => "float"
+            "tb_child_discount" => "float",
+            "tb_tourprice" => "money"
         );
     }
     
