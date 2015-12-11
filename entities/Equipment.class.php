@@ -18,9 +18,21 @@ class Equipment extends ReadOnlyEntity {
             "siteid" => array ( "type"=>"guid", "logicalName"=>"site" ),
             "tb_productid" => array ( "type"=>"guid", "logicalName"=>"product" ), // product group name
             "tb_type" => "option",
-            "tb_bikerecordid" => array ( "type"=>"guid", "logicalName"=>"tb_bike" ), 
+            "tb_bikerecordid" => array ( "type"=>"guid", "logicalName"=>"tb_bike" ),
             "tb_primarylanguage" => "option",
-            "tb_productid" => array ( "type"=>"guid", "logicalName"=>"product" )  
+            "tb_productid" => array ( "type"=>"guid", "logicalName"=>"product" ),
+            "tb_gender" => "option",                // nuovo
+            "tb_size" => "float",                   // nuovo
+            "tb_available_for_rental" => "option",
+            "tb_accessory_on_bike" => "boolean",    // nuovo
+            "tb_displayonwebsite" => "option",
+            "tb_not_to_be_blocked" => "option",
+            "tb_childseat_availability" => "option",
+            "tb_bikemodel" => array ( "type"=>"guid", "logicalName"=>"tb_bikemodel" ), 
+            "tb_frame_size" => "float",
+            "tb_mounted_on_bike" => "option",
+            "tb_primary_language" => "option",
+            "tb_part_of_the_day" => "option"
         );
     }
     

@@ -57,7 +57,7 @@ class DynamicsIntegrator
 		return self::$securityData;
 	}
 
-	private function doStateRequest( $state, $status, $guid, $logicalName ) {
+	public function doStateRequest( $state, $status, $guid, $logicalName ) {
 
 		$head = EntityUtils::getCRMSoapHeader(self::$organizationServiceURL, self::$securityData);
 		$xml = '<s:Body>
