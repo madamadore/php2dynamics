@@ -67,6 +67,7 @@ class Data {
     public function importClass($className, $conditions = array(), $conn) {
         $obj = new $className();
         $collection = $obj->RetrieveMultiple($conditions);
+        //echo $collection;
         
         $ret = array();
         foreach ($collection as $single) {

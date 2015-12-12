@@ -20,18 +20,19 @@ if (count($argv) > 2) {
 switch ($argv[1]) {
     case "database:create":
         $database = new Database();
-        if (count($arguments)==0) { $arguments = Database::$_TABLES; }
+        if (count($arguments )== 0) { $arguments = Database::$_TABLES; }
         $database->create($arguments);
         break;
     case "data:import":
         $data = new Data();
-        if (count($arguments)==0) { $arguments = array(
+        if (count($arguments) == 0) { $arguments = array(
             'Appointment',
             'BikeModel',
             'Contact',
             'Equipment',
             'PriceList',
             'PriceListItem',
+            'Season',
             'Tour',
         ); }
         $data->import($arguments);
