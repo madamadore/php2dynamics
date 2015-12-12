@@ -76,7 +76,7 @@ class Equipment extends ReadOnlyEntity {
                 }
                 $guid = $resources[ $counter ];
 
-                $avaibilityReponse = array( "avaibility" => $available, "details" => $reservation);
+                $avaibilityReponse = array( "availability" => $available, "details" => $reservation);
                 $accountsArray[ $guid ] = $avaibilityReponse;
                 $counter++;
             }

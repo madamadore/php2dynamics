@@ -132,6 +132,11 @@ class TopBikeConstants {
         "Yes" => "1"
     );
     
+    public static $_YES_NO_OPTION = array( 
+        "No" => "108600001", 
+        "Yes" => "108600000"
+    );
+    
     public static $_DISCOUNT_TYPE = array( 
         "Percentage" => "0", 
         "Fixed Amount" => "1"
