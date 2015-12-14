@@ -27,6 +27,7 @@ class Product extends ReadOnlyEntity {
             "tb_startingpoint" => "string",
             "tb_summary" => "string",
             "tb_available_languages" => "string",
+            "tb_bikeprofile" => "option",
             "tb_childseat_availability" => "option",    // nuovo
             "tb_bike_product_category" => "option",     // nuovo
             "tb_display_on_website" => "boolean",       // nuovo

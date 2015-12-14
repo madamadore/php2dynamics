@@ -50,7 +50,8 @@ class TopBikeConstants {
         "Inside Rome" => "108600000", 
         "Outside Rome" => "108600001",
         "Bike" => "108600002",
-        "Accessory" => "108600003"
+        "Accessory" => "108600003",
+        "Internal" => "108600004"
     );
     
     public static $_OCCUPATION_FACTOR = array( 
@@ -135,6 +136,11 @@ class TopBikeConstants {
     public static $_YES_NO = array( 
         "No" => "0", 
         "Yes" => "1"
+    );
+    
+    public static $_BIKE_PROFILES = array( 
+        "Low" => "0", 
+        "High" => "1"
     );
     
     public static $_DISCOUNT_TYPE = array( 
