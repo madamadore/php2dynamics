@@ -14,7 +14,8 @@ class PriceListItem extends ReadOnlyEntity {
             "percentage" => "float",
             "pricelevelid" => array ( "type"=>"guid", "logicalName"=>"pricelevel" ),
             "productid" => array ( "type"=>"guid", "logicalName"=>"product" ),
-            "productpricelevelid" => "string"
+            "productpricelevelid" => "string",
+            "uomid" => array ( "type"=>"guid", "logicalName"=>"uom" ),
         );
     }
     

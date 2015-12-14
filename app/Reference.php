@@ -17,6 +17,7 @@ require_once(dirname(__FILE__) . '/../entities/Product.class.php');
 require_once(dirname(__FILE__) . '/../entities/Season.class.php');
 require_once(dirname(__FILE__) . '/../entities/Tour.class.php');
 require_once(dirname(__FILE__) . '/../entities/TourBooking.class.php');
+require_once(dirname(__FILE__) . '/../entities/Unit.class.php');
 
 require_once(dirname(__FILE__) . '/Database.class.php');
 require_once(dirname(__FILE__) . '/Data.class.php');
