@@ -57,6 +57,11 @@ class TopBikeConstants {
         "Half Day" => "108600000", 
         "Full Day" => "108600001", 
     );
+    
+    public static $_UNIT_TYPE = array( 
+        "People" => "9108d0c4-7e09-4db2-8c9c-256ce196fb46", 
+        "Day" => "cd789775-68e1-e211-b713-d4856451dc79"
+    );
 
     public static $_BOOKING_TYPE = array( 
         "Web" => "108600000", 

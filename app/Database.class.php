@@ -15,7 +15,7 @@ class Database {
                     $entity = new Customer();
                     break;
                 case 'Product':
-                    $entity = new Tour();
+                    $entity = new Product();
                     break;
                 default:
                     $entity = new $className();

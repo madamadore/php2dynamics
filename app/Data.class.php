@@ -35,8 +35,8 @@ class Data {
                     $className = 'Customer';
                     break;
                 case 'Product':
-                    $ret = $this->importClass('Tour', array(), $conn);
-                    $className = 'Tour';
+                    $ret = $this->importClass('Product', array(), $conn);
+                    $className = 'Product';
                     break;
                 default:
                     $ret = $this->importClass($arg, array(), $conn);
