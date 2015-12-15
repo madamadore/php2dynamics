@@ -33,7 +33,8 @@ class Product extends ReadOnlyEntity {
             "tb_display_on_website" => "boolean",       // nuovo
             "tb_product_type" => "option",
             "tb_available_languages" => "string",
-            "tb_guide_occupation_factor" => "option"
+            "tb_guide_occupation_factor" => "option",
+            "tb_bikeprofile" => "option"
         );
     }
 

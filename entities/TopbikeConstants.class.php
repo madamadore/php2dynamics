@@ -133,6 +133,11 @@ class TopBikeConstants {
         "High" => "108600001"
     );
     
+    public static $_YES_NO_OPTION = array( 
+        "No" => "108600000", 
+        "Yes" => "108600001"
+    );
+    
     public static $_YES_NO = array( 
         "No" => "0", 
         "Yes" => "1"
@@ -146,6 +151,11 @@ class TopBikeConstants {
     public static $_DISCOUNT_TYPE = array( 
         "Percentage" => "0", 
         "Fixed Amount" => "1"
+    );
+    
+    public static $_OVERNIGHT_PRODUCTS = array(
+        "Low" => "54b9c609-f0cb-e411-80da-c4346bad5034",
+        "High" => "aefcaf6-efcb-e411-80da-c4346bad5034"
     );
     
     public static $_STARTING_TIME = array( 
