@@ -50,12 +50,18 @@ class TopBikeConstants {
         "Inside Rome" => "108600000", 
         "Outside Rome" => "108600001",
         "Bike" => "108600002",
-        "Accessory" => "108600003"
+        "Accessory" => "108600003",
+        "Internal" => "108600004"
     );
     
     public static $_OCCUPATION_FACTOR = array( 
         "Half Day" => "108600000", 
         "Full Day" => "108600001", 
+    );
+    
+    public static $_UNIT_TYPE = array( 
+        "People" => "9108d0c4-7e09-4db2-8c9c-256ce196fb46", 
+        "Day" => "cd789775-68e1-e211-b713-d4856451dc79"
     );
 
     public static $_BOOKING_TYPE = array( 
@@ -132,6 +138,11 @@ class TopBikeConstants {
         "Yes" => "1"
     );
     
+    public static $_BIKE_PROFILES = array( 
+        "Low" => "0", 
+        "High" => "1"
+    );
+    
     public static $_YES_NO_OPTION = array( 
         "No" => "108600001", 
         "Yes" => "108600000"
@@ -140,6 +151,11 @@ class TopBikeConstants {
     public static $_DISCOUNT_TYPE = array( 
         "Percentage" => "0", 
         "Fixed Amount" => "1"
+    );
+    
+    public static $_OVERNIGHT_PRODUCTS = array(
+        "Low" => "54b9c609-f0cb-e411-80da-c4346bad5034",
+        "High" => "aefcaf6-efcb-e411-80da-c4346bad5034"
     );
     
     public static $_STARTING_TIME = array( 

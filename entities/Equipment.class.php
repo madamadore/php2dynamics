@@ -24,8 +24,6 @@ class Equipment extends ReadOnlyEntity {
             "tb_gender" => "option",                // nuovo
             "tb_size" => "float",                   // nuovo
             "tb_available_for_rental" => "option",
-            "tb_accessory_on_bike" => "boolean",    // nuovo
-            "tb_displayonwebsite" => "option",
             "tb_not_to_be_blocked" => "option",
             "tb_childseat_availability" => "option",
             "tb_bikemodel" => array ( "type"=>"guid", "logicalName"=>"tb_bikemodel" ), 
