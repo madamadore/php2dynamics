@@ -15,9 +15,7 @@ class PriceList extends ReadOnlyEntity {
             "enddate" => "datetime",
             "tb_languages" => "string",
             "tb_season" => "option",
-            "pricelevelid" => "string",
-            "statecode" => "string",
-            "statuscode" => "string",
+            "pricelevelid" => "string"
         );
     }
     

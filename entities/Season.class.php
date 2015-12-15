@@ -12,7 +12,7 @@ class Season extends ReadOnlyEntity {
             "tb_name" => "string",
             "tb_start_date" => "datetime",
             "tb_end_date" => "datetime",
-            "tb_season_type" => "option",
+            "tb_seasontype" => "option",
             "tb_seasonid"=> "string"
         );
     }

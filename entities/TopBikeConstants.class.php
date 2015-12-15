@@ -133,6 +133,11 @@ class TopBikeConstants {
         "High" => "108600001"
     );
     
+    public static $_YES_NO_OPTION = array( 
+        "No" => "108600000", 
+        "Yes" => "108600001"
+    );
+    
     public static $_YES_NO = array( 
         "No" => "0", 
         "Yes" => "1"
