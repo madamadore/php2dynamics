@@ -1,6 +1,6 @@
 <?php
 
-class Discount {
+class Discount extends ReadOnlyEntity {
     
     public function getLogicalName() {
         return "tb_discount";
@@ -10,7 +10,6 @@ class Discount {
         return array(
             "tb_code" => "string",
             "tb_discount" => "int", // percentuale di sconto
-            "tb_regarding" => "string",
             "tb_name" => "string",
             "tb_discount_amount" => "money",
             "tb_discount_type" => "option",
