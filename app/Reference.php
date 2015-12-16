@@ -9,6 +9,7 @@ require_once(dirname(__FILE__) . '/../entities/BikeRental.class.php');
 require_once(dirname(__FILE__) . '/../entities/Booking.class.php');
 require_once(dirname(__FILE__) . '/../entities/Customer.class.php');
 require_once(dirname(__FILE__) . '/../entities/Equipment.class.php');
+require_once(dirname(__FILE__) . '/../entities/Discount.class.php');
 require_once(dirname(__FILE__) . '/../entities/Price.class.php');
 require_once(dirname(__FILE__) . '/../entities/PriceList.class.php');
 require_once(dirname(__FILE__) . '/../entities/PriceListItem.class.php');

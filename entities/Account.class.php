@@ -6,7 +6,9 @@ class Account extends Entity {
     public function getSchema() {
         return array(
                 "name" => "string",
-                "description" => "string"
+                "description" => "string",
+                "partnerid" => "string",
+                "accountid" => "string"
             );
     }
     
