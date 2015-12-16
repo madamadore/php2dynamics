@@ -297,6 +297,9 @@ class CrmXmlBuilder {
                 case "float":
                     $xml .= $this->do_generic_value( $key, $value, "double" );
                     break;
+                case "decimal":
+                    $xml .= $this->do_generic_value( $key, $value, "decimal" );
+                    break;
                 case "guid":
                     $xml .= $this->do_guid_value( $key, $value, $logicalName );
                     break;
