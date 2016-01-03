@@ -18,6 +18,7 @@ class Product extends ReadOnlyEntity {
             "statuscode" => "string",
             "tb_commercialname" => "string",
             "tb_dailyparticipants" => "int",
+            "tb_duration" => "int",
             "tb_included" => "string",
             "tb_notincluded" => "string",
             "tb_preparationtasks" => "string",

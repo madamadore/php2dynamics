@@ -49,7 +49,8 @@ class Booking extends Entity {
             "tb_child_seats" => "decimal",
             "tb_ebikes_number" => "decimal",
             "description" => "string",
-            "tb_creditcardrequirednew" => "option"
+            "tb_creditcardrequirednew" => "option",
+            "tb_pricelistid" => array ( "type"=>"guid", "logicalName"=>"pricelevel" )
         );
     }
     

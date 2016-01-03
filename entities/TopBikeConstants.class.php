@@ -2,6 +2,7 @@
 
 class TopBikeConstants {
     
+    // INIZIO PARAMETRI DEL BACK END
     public static $_MIN_HEIGHT_CHILDEXTENSION = 100;    // cm
     public static $_MAX_HEIGHT_CHILDEXTENSION = 130;    // cm
     public static $_MAX_WEIGHT_CHILDSEAT_FRONT = 16;    // kg
@@ -34,6 +35,8 @@ class TopBikeConstants {
         "Rental" => "74356AB9-1244-E111-90B4-1CC1DE6D3B23", 
         "Tour" => "1D3E19B5-EFDA-E111-B52D-D4856451DC79" 
     );
+    
+    // FINE PARAMETRI DEL BACK END
     
     public static $_LANGUAGE = array( 
         "EN" => "108600000", 
@@ -148,11 +151,6 @@ class TopBikeConstants {
         "High" => "108600001"
     );
     
-    public static $_YES_NO_OPTION = array( 
-        "No" => "108600000", 
-        "Yes" => "108600001"
-    );
-    
     public static $_YES_NO = array( 
         "No" => "0", 
         "Yes" => "1"
@@ -168,11 +166,17 @@ class TopBikeConstants {
         "Yes" => "108600000"
     );
     
+    public static $_TRUE_FALSE_OPTION = array( 
+        "True" => "true", 
+        "False" => "false"
+    );
+    
     public static $_DISCOUNT_TYPE = array( 
         "Percentage" => "false", 
         "Fixed Amount" => "true"
     );
     
+    // QUESTE SONO ALTRE ENTITIES:
     public static $_STARTING_TIME = array( 
         "08:00" => "108600000", 
         "08:15" => "108600001",
